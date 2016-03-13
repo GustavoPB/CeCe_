@@ -5,7 +5,7 @@
     <plugin name="cell" />
     <plugin name="object-generator" />
     <plugin name="streamlines" />
-    <plugin name="chemostat" pipe-top="20um" pipe-radius="5um" size="80um" visible="true"/>
+    <plugin name="chemostat" pipe-top="20um" pipe-radius="5um" size="80um" visible="true" isSymmetric="false"/>
     <plugin name="agglutination" />
     
 
