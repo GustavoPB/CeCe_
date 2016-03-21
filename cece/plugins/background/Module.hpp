@@ -39,6 +39,7 @@
 /* ************************************************************************ */
 
 // CeCe
+#include "cece/core/String.hpp"
 #include "cece/module/Module.hpp"
 #include "cece/render/Object.hpp"
 #include "cece/render/GridColor.hpp"
@@ -64,6 +65,36 @@ public:
     using module::Module::Module;
 
 
+// Public Accessors
+public:
+
+
+    /**
+     * @brief Returns background image name.
+     *
+     * @return
+     */
+    const String& getImageName() const noexcept
+    {
+        return m_imageName;
+    }
+
+
+// Public Mutators
+public:
+
+
+    /**
+     * @brief Set background image name.
+     *
+     * @param name
+     */
+    void setImageName(String name) noexcept
+    {
+        m_imageName = std::move(name);
+    }
+
+
 // Public Operations
 public:
 
@@ -77,6 +108,20 @@ public:
 
 
     /**
+     * @brief Store module configuration.
+     *
+     * @param config Output configuration.
+     */
+    void storeConfig(config::Configuration& config) const override;
+
+
+    /**
+     * @brief Initialize module.
+     */
+    void init() override;
+
+
+    /**
      * @brief Render module.
      *
      * @param context Rendering context.
@@ -86,6 +131,9 @@ public:
 
 // Private Data Members
 private:
+
+    /// Image name.
+    String m_imageName;
 
     /// Image data.
     DynamicArray<unsigned char> m_data;

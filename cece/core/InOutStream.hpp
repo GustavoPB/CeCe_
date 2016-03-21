@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2015                                                    */
+/* Georgiev Lab (c) 2015-2016                                               */
 /* ************************************************************************ */
 /* Department of Cybernetics                                                */
 /* Faculty of Applied Sciences                                              */
@@ -23,64 +23,28 @@
 /*                                                                          */
 /* ************************************************************************ */
 
-// Must be first
-#include "cece/plugins/python/Python.hpp"
+#pragma once
 
-// CeCe
-#include "cece/plugin/definition.hpp"
-#include "cece/plugin/Api.hpp"
-#include "cece/simulator/Simulation.hpp"
+/* ************************************************************************ */
+
+// C++
+#include <iostream>
 
 /* ************************************************************************ */
 
 namespace cece {
-namespace plugin {
-namespace streamlines_python {
+inline namespace core {
 
 /* ************************************************************************ */
 
-void init_Module(PyObject* module);
-
-/* ************************************************************************ */
-
-void init()
-{
-    PyObject* module = Py_InitModule("streamlines", nullptr);
-
-    init_Module(module);
-}
+/**
+ * @brief Input & output stream type.
+ */
+using InOutStream = std::iostream;
 
 /* ************************************************************************ */
 
 }
 }
-}
-
-/* ************************************************************************ */
-
-using namespace cece;
-using namespace cece::simulator;
-
-/* ************************************************************************ */
-
-class StreamlinesPythonApi : public plugin::Api
-{
-
-    DynamicArray<String> requiredPlugins() const override
-    {
-        return {"python", "streamlines"};
-    }
-
-
-    void initSimulation(Simulation& simulation) override
-    {
-        simulation.requirePlugin("python");
-        plugin::streamlines_python::init();
-    }
-};
-
-/* ************************************************************************ */
-
-CECE_DEFINE_PLUGIN(streamlines_python, StreamlinesPythonApi)
 
 /* ************************************************************************ */

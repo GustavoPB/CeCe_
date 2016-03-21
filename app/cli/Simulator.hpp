@@ -108,6 +108,17 @@ public:
 
 
     /**
+     * @brief Returns if simulation is visualized.
+     *
+     * @return
+     */
+    bool isVisualized() const noexcept
+    {
+        return m_visualize;
+    }
+
+
+    /**
      * @brief Returns if simulation is paused.
      *
      * @return
@@ -378,6 +389,10 @@ private:
 #endif
 
 #ifdef CECE_CLI_ENABLE_VIDEO_CAPTURE
+
+    /// Path to output video file.
+    FilePath m_videoFileName;
+
     /// Video writer.
     FILE* m_videoWriter = nullptr;
 #endif

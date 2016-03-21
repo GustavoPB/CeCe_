@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2015                                                    */
+/* Georgiev Lab (c) 2015-2016                                               */
 /* ************************************************************************ */
 /* Department of Cybernetics                                                */
 /* Faculty of Applied Sciences                                              */
@@ -300,6 +300,17 @@ public:
 
 
     /**
+     * @brief Returns characteristic velocity.
+     *
+     * @return
+     */
+    units::Velocity getCharVelocity() const noexcept
+    {
+        return getCharLength() / getCharTime();
+    }
+
+
+    /**
      * @brief Returns number of nodes in LB along characteristic length.
      *
      * @return
@@ -318,6 +329,17 @@ public:
     unsigned int getNumberSteps() const noexcept
     {
         return m_numberSteps;
+    }
+
+
+    /**
+     * @brief Returns if streamlines are dynamic during simulation.
+     *
+     * @return
+     */
+    bool isDynamic() const noexcept
+    {
+        return m_dynamic;
     }
 
 
@@ -476,6 +498,17 @@ public:
 
 
     /**
+     * @brief Set if streamlines should be dynamic.
+     *
+     * @param dynamic
+     */
+    void setDynamic(bool dynamic)
+    {
+        m_dynamic = dynamic;
+    }
+
+
+    /**
      * @brief Set fluid dynamics.
      *
      * @param dynamics
@@ -510,6 +543,14 @@ public:
      * @param config Source configuration.
      */
     void loadConfig(const config::Configuration& config) override;
+
+
+    /**
+     * @brief Store module configuration.
+     *
+     * @param config Output configuration.
+     */
+    void storeConfig(config::Configuration& config) const override;
 
 
     /**
@@ -708,6 +749,27 @@ protected:
 
 
     /**
+     * @brief Calculate number of time steps from tau.
+     *
+     * @param tau
+     *
+     * @return
+     */
+    unsigned int calculateNumberSteps(RealType tau) const noexcept;
+
+
+    /**
+     * @brief Calculate Reynolds number.
+     *
+     * @return
+     */
+    RealType calculateRe() const noexcept
+    {
+        return getCharLength() * getCharLength() / getCharTime() / getKinematicViscosity();
+    }
+
+
+    /**
      * @brief Init border barrier.
      *
      * @param pos
@@ -725,8 +787,6 @@ protected:
 
     /**
      * @brief Print streamlines informations.
-     *
-     * @param simulation
      */
     virtual void printInfo();
 
@@ -786,6 +846,9 @@ private:
     /// Number of LB time steps for units conversions
     unsigned int m_numberSteps = 1;
 
+    /// If streamlines is updated during simulation iterations.
+    bool m_dynamic = true;
+
     /// Path to initialization file.
     FilePath m_initFile;
 
@@ -794,9 +857,6 @@ private:
 
     /// Streamlines layout.
     Layout m_layout;
-
-    /// Layout type - used for initialization.
-    String m_layoutType;
 
     /// Barriers created for layout.
     StaticArray<ViewPtr<object::Object>, LayoutPosCount> m_layoutBarriers;
@@ -845,6 +905,18 @@ private:
  * @return is.
  */
 InStream& operator>>(InStream& is, Module::LayoutType& type);
+
+/* ************************************************************************ */
+
+/**
+ * @brief Write layout type from stream.
+ *
+ * @param os   Output stream.
+ * @param type Input type.
+ *
+ * @return os.
+ */
+OutStream& operator<<(OutStream& os, const Module::LayoutType& type);
 
 /* ************************************************************************ */
 
