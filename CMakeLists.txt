@@ -61,7 +61,7 @@ option(CONFIG_RENDER_ENABLE         "Enable simulation rendering (vizualization 
 option(CONFIG_PHYSICS_BUILTIN       "Enable builtin physics engine (Box2D)" On)
 
 # Real type
-set(CONFIG_REAL_TYPE "float" CACHE STRING "Type used for real values")
+set(CONFIG_REAL_TYPE "double" CACHE STRING "Type used for real values")
 set_property(CACHE CONFIG_REAL_TYPE PROPERTY STRINGS "float" "double" "long double")
 
 # Dev options
@@ -124,6 +124,7 @@ include(Functions)
 # Install directories
 set(INSTALL_DIR_RUNTIME "bin")
 set(INSTALL_DIR_LIBRARY "lib")
+set(INSTALL_DIR_INCLUDE "include")
 set(INSTALL_DIR_PLUGINS "${INSTALL_DIR_LIBRARY}/${CMAKE_PROJECT_NAME}")
 set(INSTALL_DIR_PLUGINS_FULL "${CMAKE_INSTALL_PREFIX}/${INSTALL_DIR_PLUGINS}")
 set(INSTALL_DIR_FRAMEWORK "")
@@ -133,22 +134,25 @@ set(INSTALL_DIR_MANUAL ".")
 
 # Linux installation directories
 if (UNIX AND NOT APPLE)
-    set(INSTALL_PREFIX "/usr") # CPack with DEB ignores CMAKE_INSTALL_PREFIX
+    #set(INSTALL_PREFIX "/usr") # CPack with DEB ignores CMAKE_INSTALL_PREFIX
     include(GNUInstallDirs)
     set(INSTALL_DIR_RUNTIME "${CMAKE_INSTALL_BINDIR}")
     set(INSTALL_DIR_LIBRARY "${CMAKE_INSTALL_LIBDIR}")
+    set(INSTALL_DIR_INCLUDE "${CMAKE_INSTALL_INCLUDEDIR}")
     set(INSTALL_DIR_PLUGINS "${INSTALL_DIR_LIBRARY}/${DIR_PLUGINS}")
     set(INSTALL_DIR_DATA    "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}")
     set(INSTALL_DIR_MANUAL  "${CMAKE_INSTALL_DOCDIR}")
 elseif (APPLE)
     set(INSTALL_DIR_RUNTIME "bin")
     set(INSTALL_DIR_LIBRARY "lib")
+    set(INSTALL_DIR_INCLUDE "include")
     set(INSTALL_DIR_PLUGINS "plugins")
     set(INSTALL_DIR_BUNDLE  "bin")
     set(INSTALL_DIR_MANUAL  "manual")
 elseif (WIN32)
     set(INSTALL_DIR_RUNTIME ".")
     set(INSTALL_DIR_LIBRARY ".")
+    set(INSTALL_DIR_INCLUDE "include")
     set(INSTALL_DIR_PLUGINS ".")
     set(INSTALL_DIR_MANUAL  "manual")
     set(PLUGINS_DIRECTORY ".")

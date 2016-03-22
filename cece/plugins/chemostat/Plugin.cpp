@@ -212,6 +212,6 @@ class ChemostatApi: public plugin::Api {
 
 /* ************************************************************************ */
 
-DEFINE_PLUGIN(chemostat, ChemostatApi)
+CECE_DEFINE_PLUGIN(chemostat, ChemostatApi)
 
 /* ************************************************************************ */

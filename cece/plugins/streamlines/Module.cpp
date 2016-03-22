@@ -81,6 +81,26 @@ InStream& operator>>(InStream& is, Module::Layout& layout)
 /* ************************************************************************ */
 
 /**
+ * @brief Write layout description.
+ *
+ * @param os     Output stream.
+ * @param layout Output layout.
+ *
+ * @return is.
+ */
+OutStream& operator<<(OutStream& os, const Module::Layout& layout)
+{
+    return os <<
+        layout[Module::LayoutPosTop] << " " <<
+        layout[Module::LayoutPosRight] << " " <<
+        layout[Module::LayoutPosBottom] << " " <<
+        layout[Module::LayoutPosLeft]
+    ;
+}
+
+/* ************************************************************************ */
+
+/**
  * @brief Read inlet velocities.
  *
  * @param is         Input stream.
@@ -94,6 +114,26 @@ InStream& operator>>(InStream& is, Module::InletVelocities& velocities)
         velocities[Module::LayoutPosTop] >>
         velocities[Module::LayoutPosRight] >>
         velocities[Module::LayoutPosBottom] >>
+        velocities[Module::LayoutPosLeft]
+    ;
+}
+
+/* ************************************************************************ */
+
+/**
+ * @brief Write inlet velocities.
+ *
+ * @param os         Output stream.
+ * @param velocities
+ *
+ * @return is.
+ */
+OutStream& operator<<(OutStream& os, const Module::InletVelocities& velocities)
+{
+    return os <<
+        velocities[Module::LayoutPosTop] << " " <<
+        velocities[Module::LayoutPosRight] << " " <<
+        velocities[Module::LayoutPosBottom] << " " <<
         velocities[Module::LayoutPosLeft]
     ;
 }
@@ -262,26 +302,30 @@ void Module::update()
 
     auto _ = measure_time("streamlines", simulator::TimeMeasurement(getSimulation()));
 
-    // Obstacles
-    updateObstacleMap();
-
     // Store streamlines data
     if (m_dataOut)
         storeData();
 
+    // No recalculation
+    if (isDynamic())
+    {
+        // Obstacles
+        updateObstacleMap();
+
 #ifdef CECE_THREAD_SAFE
-    // Lock access
-    MutexGuard guard(m_mutex);
+        // Lock access
+        MutexGuard guard(m_mutex);
 #endif
 
-    // Compute inner iterations
-    for (simulator::IterationNumber it = 0; it < getInnerIterations(); it++)
-    {
-        // Collide and propagate
-        m_lattice.collideAndStream();
+        // Compute inner iterations
+        for (simulator::IterationNumber it = 0; it < getInnerIterations(); it++)
+        {
+            // Collide and propagate
+            m_lattice.collideAndStream();
 
-        // Apply boundary conditions
-        applyBoundaryConditions();
+            // Apply boundary conditions
+            applyBoundaryConditions();
+        }
     }
 
     // Apply streamlines to world objects
@@ -294,6 +338,9 @@ void Module::loadConfig(const config::Configuration& config)
 {
     // Configure parent
     module::Module::loadConfig(config);
+
+    // Set streamlines dynamicity
+    setDynamic(config.get("dynamic", isDynamic()));
 
     // Number of init iterations
     setInitIterations(config.get("init-iterations", getInitIterations()));
@@ -352,14 +399,18 @@ void Module::loadConfig(const config::Configuration& config)
         m_lattice.setSize(size);
     }
 
-    // Set number of time steps
-    setNumberSteps(config.get("number-steps", getNumberNodes() * getNumberNodes() * 20));
+    if (config.has("tau"))
+    {
+        setNumberSteps(calculateNumberSteps(config.get<RealType>("tau")));
+    }
+    else
+    {
+        // Set number of time steps
+        setNumberSteps(config.get("number-steps", getNumberNodes() * getNumberNodes() * 20));
+    }
 
     // Layout
     setLayout(config.get("layout", getLayout()));
-
-    // Get layout type
-    m_layoutType = config.get("layout-type", String{});
 
     // Enable dynamic object obstacles
     setDynamicObjectsObstacles(config.get("dynamic-object-obstacles", isDynamicObjectsObstacles()));
@@ -373,7 +424,7 @@ void Module::loadConfig(const config::Configuration& config)
         storeDataHeader();
     }
 
-#if ENABLE_RENDER
+#ifdef CECE_ENABLE_RENDER
     setDebugMagnitudeScale(config.get("debug-magnitude-scale", getDebugMagnitudeScale()));
 #endif
 
@@ -387,8 +438,31 @@ void Module::loadConfig(const config::Configuration& config)
         if (file.substr(0, 6) == "%temp%")
             m_initFile = tempDirectory() / file.substr(6);
         else
-            m_initFile = config.buildFilePath(file);
+            m_initFile = file;
     }
+}
+
+/* ************************************************************************ */
+
+void Module::storeConfig(config::Configuration& config) const
+{
+    module::Module::storeConfig(config);
+
+    config.set("init-iterations", getInitIterations());
+    config.set("inner-iterations", getInnerIterations());
+    config.set("inlet-velocities", getInletVelocities());
+    config.set("kinematic-viscosity", getKinematicViscosity());
+    config.set("char-length", getCharLength());
+    config.set("number-nodes", getNumberNodes());
+    config.set("number-steps", getNumberSteps());
+
+    config.set("layout", getLayout());
+
+#ifdef CECE_ENABLE_RENDER
+    config.set("debug-magnitude-scale", getDebugMagnitudeScale());
+#endif
+
+    // TODO: init file
 }
 
 /* ************************************************************************ */
@@ -784,8 +858,8 @@ VelocityVector Module::inletVelocityProfile(
             Zero,
             -calcPoiseuilleFlow(
                 getInletVelocities()[pos],
-                coord.getX() - inletRange[0].getX(),
-                (inletRange[1] - inletRange[0]).getWidth() + 1
+                coord.getX() - inletRange[0].getX() + 1,
+                (inletRange[1] - inletRange[0]).getWidth() + 2
             )
         };
         break;
@@ -795,8 +869,8 @@ VelocityVector Module::inletVelocityProfile(
             Zero,
             calcPoiseuilleFlow(
                 getInletVelocities()[pos],
-                coord.getX() - inletRange[0].getX(),
-                (inletRange[1] - inletRange[0]).getWidth() + 1
+                coord.getX() - inletRange[0].getX() + 1,
+                (inletRange[1] - inletRange[0]).getWidth() + 2
             )
         };
         break;
@@ -805,8 +879,8 @@ VelocityVector Module::inletVelocityProfile(
         return {
             -calcPoiseuilleFlow(
                 getInletVelocities()[pos],
-                coord.getY() - inletRange[0].getY(),
-                (inletRange[1] - inletRange[0]).getHeight() + 1
+                coord.getY() - inletRange[0].getY() + 1,
+                (inletRange[1] - inletRange[0]).getHeight() + 2
             ),
             Zero
         };
@@ -816,8 +890,8 @@ VelocityVector Module::inletVelocityProfile(
         return {
             calcPoiseuilleFlow(
                 getInletVelocities()[pos],
-                coord.getY() - inletRange[0].getY(),
-                (inletRange[1] - inletRange[0]).getHeight() + 1
+                coord.getY() - inletRange[0].getY() + 1,
+                (inletRange[1] - inletRange[0]).getHeight() + 2
             ),
             Zero
         };
@@ -835,8 +909,8 @@ VelocityVector Module::inletVelocityProfile(
 
 RealType Module::calculateViscosity() const noexcept
 {
-    const auto charTime = m_charTime / getNumberSteps();
-    const auto charLength = m_charLength / getNumberNodes();
+    const auto charTime = getCharTime() / getNumberSteps();
+    const auto charLength = getCharLength() / getNumberNodes();
 
     return charTime / (charLength * charLength) * getKinematicViscosity();
 }
@@ -846,6 +920,17 @@ RealType Module::calculateViscosity() const noexcept
 RealType Module::calculateTau() const noexcept
 {
     return Descriptor::SPEED_OF_SOUND_SQ_INV * calculateViscosity() + 0.5;
+}
+
+/* ************************************************************************ */
+
+unsigned int Module::calculateNumberSteps(RealType tau) const noexcept
+{
+    return Descriptor::SPEED_OF_SOUND_SQ_INV *
+        (getCharTime() * getNumberNodes() * getNumberNodes() * getKinematicViscosity())
+        /
+        ((tau - 0.5) * getCharLength() * getCharLength())
+    ;
 }
 
 /* ************************************************************************ */
@@ -1083,13 +1168,15 @@ void Module::printInfo()
     Log::info("[streamlines] Max object speed: ", getSimulation().getMaxObjectTranslation(), " um/it");
     Log::info("[streamlines] Char. length: ", getCharLength(), " um");
     Log::info("[streamlines] Char. time: ", getCharTime(), " s");
-    Log::info("[streamlines] Char. speed: ", getCharLength() / getCharTime(), " um/s");
-    Log::info("[streamlines] Re: ", getCharLength() * getCharLength() / getCharTime() / getKinematicViscosity());
+    Log::info("[streamlines] Char. speed: ", getCharVelocity(), " um/s");
+    Log::info("[streamlines] Number of nodes: ", getNumberNodes());
+    Log::info("[streamlines] Number of time steps: ", getNumberSteps());
+    Log::info("[streamlines] Re: ", calculateRe());
     Log::info("[streamlines] ## Lattice ##");
     Log::info("[streamlines] Tau: ", calculateTau());
     Log::info("[streamlines] Omega: ", calculateOmega());
     Log::info("[streamlines] Grid: (", size.getWidth(), "; ", size.getHeight(), ")");
-    Log::info("[streamlines] LB Viscosity: ", calculateViscosity());
+    Log::info("[streamlines] Viscosity: ", calculateViscosity());
 }
 
 /* ************************************************************************ */
@@ -1269,6 +1356,26 @@ InStream& operator>>(InStream& is, Module::LayoutType& type)
         throw InvalidArgumentException("Unknown layout type");
 
     return is;
+}
+
+/* ************************************************************************ */
+
+OutStream& operator<<(OutStream& os, const Module::LayoutType& type)
+{
+    switch (type)
+    {
+    case Module::LayoutType::None:
+        os << "none"; break;
+    case Module::LayoutType::Barrier:
+        os << "barrier"; break;
+    case Module::LayoutType::Inlet:
+        os << "inlet"; break;
+    case Module::LayoutType::Outlet:
+        os << "outlet"; break;
+    default:
+        throw InvalidArgumentException("Unknown layout type");
+    }
+    return os;
 }
 
 /* ************************************************************************ */

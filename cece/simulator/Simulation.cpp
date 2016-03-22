@@ -134,8 +134,9 @@ void writeCsvLine(OutStream& os, const Container& container)
 
 /* ************************************************************************ */
 
-Simulation::Simulation(plugin::Context& context) noexcept
+Simulation::Simulation(plugin::Context& context, FilePath path) noexcept
     : m_pluginContext(context)
+    , m_fileName(std::move(path))
 #ifdef CECE_ENABLE_BOX2D_PHYSICS
     , m_world{b2Vec2{0.0f, 0.0f}}
 #endif
@@ -167,6 +168,24 @@ AccelerationVector Simulation::getGravity() const noexcept
 #else
     return AccelerationVector{Zero};
 #endif
+}
+
+/* ************************************************************************ */
+
+UniquePtr<InOutStream> Simulation::getResource(const String& name) noexcept
+{
+    // Path to resource
+    const auto path = getFileName().parent_path() / name;
+
+    if (!fileExists(path))
+        return nullptr;
+
+    auto file = makeUnique<FileStream>(path.string(), std::ios::in | std::ios::out | std::ios::binary);
+
+    if (!file->is_open())
+        return nullptr;
+
+    return UniquePtr<InOutStream>{file.release()};
 }
 
 /* ************************************************************************ */
@@ -456,24 +475,29 @@ void Simulation::loadConfig(const config::Configuration& config)
         // Get name
         auto name = moduleConfig.get("name");
 
-        if (hasModule(name))
-            continue;
+        ViewPtr<module::Module> module;
 
-        const String typeName = moduleConfig.has("language")
-            ? moduleConfig.get("language")
-            : moduleConfig.has("type")
-                ? moduleConfig.get("type")
-                : name
-        ;
-
-        auto module = getPluginContext().createModule(typeName, *this);
-
-        if (module)
+        if (!hasModule(name))
         {
-            module->loadConfig(moduleConfig);
+            const String typeName = moduleConfig.has("language")
+                ? moduleConfig.get("language")
+                : moduleConfig.has("type")
+                    ? moduleConfig.get("type")
+                    : name
+            ;
 
-            addModule(std::move(name), std::move(module));
+            auto mod = getPluginContext().createModule(typeName, *this);
+
+            module = addModule(std::move(name), std::move(mod));
         }
+        else
+        {
+            module = getModule(name);
+        }
+
+        // Configure module
+        if (module)
+            module->loadConfig(moduleConfig);
     }
 
     // Parse programs
@@ -567,7 +591,7 @@ void Simulation::storeConfig(config::Configuration& config) const
     for (const auto& module : m_modules)
     {
         auto moduleConfig = config.addConfiguration("module");
-        // TODO: improve
+        moduleConfig.set("name", module.name);
         module.module->storeConfig(moduleConfig);
     }
 
@@ -575,7 +599,7 @@ void Simulation::storeConfig(config::Configuration& config) const
     for (const auto& program : m_programs)
     {
         auto programConfig = config.addConfiguration("program");
-        // TODO: improve
+        programConfig.set("name", program.name);
         program.program->storeConfig(*this, programConfig);
     }
 

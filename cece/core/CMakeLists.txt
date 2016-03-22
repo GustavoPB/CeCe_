@@ -59,6 +59,7 @@ add_library(${PROJECT_NAME} OBJECT
     Exception.hpp
     OutStream.hpp
     InStream.hpp
+    InOutStream.hpp
     FileStream.hpp
     ValueIterator.hpp
     Range.hpp
@@ -90,6 +91,15 @@ add_library(${PROJECT_NAME} OBJECT
 # ######################################################################### #
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE On)
+
+# ######################################################################### #
+
+# Install header files
+install(DIRECTORY .
+    DESTINATION ${INSTALL_DIR_INCLUDE}/${CMAKE_PROJECT_NAME}/${PROJECT_NAME}
+    COMPONENT Headers
+    FILES_MATCHING PATTERN "*.hpp"
+)
 
 # ######################################################################### #
 

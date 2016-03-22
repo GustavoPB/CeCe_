@@ -160,6 +160,7 @@
       <File Name="core/InStream.hpp"/>
       <File Name="core/OutStream.hpp"/>
       <File Name="core/StringStream.hpp"/>
+      <File Name="core/InOutStream.hpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="unit">
       <File Name="core/Units.cpp"/>
@@ -268,9 +269,6 @@
     <VirtualDirectory Name="CMake">
       <File Name="simulator/CMakeLists.txt"/>
     </VirtualDirectory>
-    <VirtualDirectory Name="resource">
-      <File Name="simulator/font.hpp"/>
-    </VirtualDirectory>
     <File Name="simulator/Simulation.cpp"/>
     <File Name="simulator/Simulation.hpp"/>
     <File Name="simulator/ConverterBox2D.cpp"/>
@@ -371,5 +369,6 @@
     <File Name="plugin/Manager.cpp"/>
     <File Name="plugin/Manager.hpp"/>
     <File Name="plugin/definition.hpp"/>
+    <File Name="plugin/Config.hpp"/>
   </VirtualDirectory>
 </CodeLite_Project>
