@@ -24,7 +24,7 @@
 /* ************************************************************************ */
 
 // Declaration
-#include "cece/plugins/agglutination/Module.hpp"
+#include "cece/plugins/infection/Module.hpp"
 
 // C++
 #include <random>
@@ -41,7 +41,7 @@
 
 namespace cece {
 namespace plugin {
-namespace agglutination {
+namespace infection {
 
 /* ************************************************************************ */
 
@@ -99,7 +99,7 @@ void Module::update()
     // Store time step
     m_step = getSimulation().getTimeStep();
 
-    auto _ = measure_time("agglutination", simulator::TimeMeasurement(getSimulation()));
+    auto _ = measure_time("infection", simulator::TimeMeasurement(getSimulation()));
 
     // Get physics world
     auto& world = getSimulation().getWorld();

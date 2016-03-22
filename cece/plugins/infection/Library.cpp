@@ -29,7 +29,7 @@
 #include "cece/plugin/Context.hpp"
 
 // Plugin
-#include "cece/plugins/agglutination/Module.hpp"
+#include "cece/plugins/infection/Module.hpp"
 
 /* ************************************************************************ */
 
@@ -37,7 +37,7 @@ using namespace cece;
 
 /* ************************************************************************ */
 
-class AgglutinationApi : public plugin::Api
+class InfectionApi : public plugin::Api
 {
 
     /**
@@ -47,7 +47,7 @@ class AgglutinationApi : public plugin::Api
      */
     void onLoad(plugin::Context& context) override
     {
-        context.registerModule<plugin::agglutination::Module>("agglutination");
+        context.registerModule<plugin::infection::Module>("infection");
     }
 
 
@@ -58,13 +58,13 @@ class AgglutinationApi : public plugin::Api
      */
     void onUnload(plugin::Context& context) override
     {
-        context.unregisterModule("agglutination");
+        context.unregisterModule("infection");
     }
 
 };
 
 /* ************************************************************************ */
 
-CECE_DEFINE_PLUGIN(agglutination, AgglutinationApi)
+CECE_DEFINE_PLUGIN(infection, InfectionApi)
 
 /* ************************************************************************ */

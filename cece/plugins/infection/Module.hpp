@@ -33,7 +33,7 @@
 /* ************************************************************************ */
 
 #ifndef CECE_ENABLE_BOX2D_PHYSICS
-#error Agglutination requires physics engine
+#error Infection requires physics engine
 #endif
 
 /* ************************************************************************ */
@@ -58,12 +58,12 @@
 
 namespace cece {
 namespace plugin {
-namespace agglutination {
+namespace infection {
 
 /* ************************************************************************ */
 
 /**
- * @brief Module for agglutination.
+ * @brief Module for infection.
  */
 class Module : public module::Module, public b2ContactListener
 {

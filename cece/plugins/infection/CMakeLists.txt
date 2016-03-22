@@ -31,7 +31,7 @@ set(SRCS
 )
 
 # Build plugin
-build_plugin(agglutination
+build_plugin(infection
     SOURCES ${SRCS}
     PLUGINS_REQUIRED cell
 )
