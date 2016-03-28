@@ -1,9 +1,9 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2015                                                    */
+/* LIA UPM (c) 2016                                                         */
 /* ************************************************************************ */
-/* Department of Cybernetics                                                */
-/* Faculty of Applied Sciences                                              */
-/* University of West Bohemia in Pilsen                                     */
+/* Department of Artifitial Intelligence                                    */
+/* Faculty of Informatics                                                   */
+/* Polytechnic University of Madrid - Spain                                 */
 /* ************************************************************************ */
 /*                                                                          */
 /* This file is part of CeCe.                                               */
@@ -29,6 +29,7 @@
 // C++
 #include <random>
 #include <algorithm>
+#include <list>
 
 // CeCe
 #include "cece/core/Log.hpp"
@@ -160,13 +161,22 @@ void Module::loadConfig(const config::Configuration& config)
 
     getSimulation().getWorld().SetContactListener(this);
 
+    // GPuig -
+
+    for (auto&& c_parasite : config.getConfigurations("parasite"))
+    {
+    	m_parasites.push_back(Parasite{
+    		c_parasite.get("name"),
+    		c_parasite.get("infects")
+    	        });
+    }
+    // GPuig --
+
     for (auto&& c_bond : config.getConfigurations("bond"))
     {
         m_bonds.push_back(Bond{
             c_bond.get<RealType>("association-constant"),
             c_bond.get<RealType>("disassociation-constant"),
-            c_bond.get("ligand"),
-            c_bond.get("receptor")
         });
     }
 }
@@ -176,6 +186,16 @@ void Module::loadConfig(const config::Configuration& config)
 void Module::storeConfig(config::Configuration& config) const
 {
     module::Module::storeConfig(config);
+
+    // GPuig -
+    for (auto&& parasite : m_parasites)
+    {
+    	auto parasiteConfig = config.addConfiguration("parasite");
+    	parasiteConfig.set("name", parasite.name);
+    	parasiteConfig.set("infects", parasite.infects);
+
+    }
+    // GPuig --
 
     // Foreach bonds
     for (const auto& bond : m_bonds)
@@ -203,6 +223,12 @@ void Module::BeginContact(b2Contact* contact)
     auto radius1 = ca.getShapes()[0].getCircle().radius;
     auto radius2 = cb.getShapes()[0].getCircle().radius;
 
+    /*EVOLUTIVO:
+     * Sustituir getMoleculeCount por una función que evalue el nombre:
+     * - Introducir GetName en CellBase.hpp
+     * - Crear aqui función para evaluar si coinciden los nombres definidos en la simulación
+     */
+
     for (unsigned int i = 0; i < m_bonds.size(); i++)
     {
         std::bernoulli_distribution dist1(
@@ -215,7 +241,7 @@ void Module::BeginContact(b2Contact* contact)
             m_toJoin.push_back(JointDef{ba, bb, m_bonds[i].dConst});
             continue;
         }
-        std::bernoulli_distribution dist2(
+        /*std::bernoulli_distribution dist2(
             getAssociationPropensity(m_step, radius1.value(), radius2.value(),
                 cb.getMoleculeCount(m_bonds[i].receptor), ca.getMoleculeCount(m_bonds[i].ligand),
                 m_bonds[i].aConst));
@@ -224,7 +250,7 @@ void Module::BeginContact(b2Contact* contact)
             Log::debug("Joined: ", ba, ", ", bb);
             m_toJoin.push_back(JointDef{ba, bb, m_bonds[i].dConst});
             continue;
-        }
+        }*/
     }
 }
 

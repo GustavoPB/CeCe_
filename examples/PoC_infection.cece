@@ -24,7 +24,8 @@
     <!-- Bond Cell - phage -->
     <module name="infection">
   		<bond ligand="P" receptor="Y" association-constant="50" disassociation-constant="75" />
-	</module>
+  		<parasite name="paco" infects="pepe" />
+	</module>-
 	
     <module name="streamlines" char-length="20" number-nodes="10" inlet-velocity="2000um/s" layout="barrier outlet barrier inlet"/>
 </simulation>

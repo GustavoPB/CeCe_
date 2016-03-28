@@ -1,9 +1,9 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2015                                                    */
+/* LIA UPM (c) 2016                                                         */
 /* ************************************************************************ */
-/* Department of Cybernetics                                                */
-/* Faculty of Applied Sciences                                              */
-/* University of West Bohemia in Pilsen                                     */
+/* Department of Artifitial Intelligence                                    */
+/* Faculty of Informatics                                                   */
+/* Polytechnic University of Madrid - Spain                                 */
 /* ************************************************************************ */
 /*                                                                          */
 /* This file is part of CeCe.                                               */
@@ -128,9 +128,18 @@ private:
     {
         RealType aConst;
         RealType dConst;
-        String ligand;
-        String receptor;
+        String ligand; //TOREMOVE
+        String receptor; //TOREMOVE
     };
+
+    /**
+     * @brief Structure for storing bonds.
+     */
+     struct Parasite
+     {
+        String name;
+        String infects;
+     };
 
 
     /**
@@ -166,6 +175,9 @@ private:
 
     /// List of created bonds.
     DynamicArray<Bond> m_bonds;
+
+    /// List of created parasites.
+    DynamicArray<Parasite> m_parasites;
 };
 
 /* ************************************************************************ */
