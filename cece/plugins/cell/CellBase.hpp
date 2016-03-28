@@ -45,6 +45,7 @@
 #include "cece/object/Object.hpp"
 
 #ifdef CECE_ENABLE_RENDER
+#include "cece/core/Log.hpp"//TOREMOVE
 #include "cece/render/Color.hpp"
 #endif
 
@@ -104,6 +105,15 @@ public:
 // Public Accessors
 public:
 
+    /** GPuig
+    * @brief Returns cell name.
+    *
+    * @return Number of molecules.
+    */
+    String getName() const noexcept
+    {
+       	return m_name;
+    }
 
     /**
      * @brief Returns cell volume.
@@ -251,6 +261,15 @@ public:
 // Public Mutators
 public:
 
+    /** GPuig
+    * @brief Set cell volume.
+    *
+    * @param volume
+    */
+    void setName(String name) noexcept
+    {
+        m_name = name;
+    }
 
     /**
      * @brief Set cell volume.
@@ -487,6 +506,9 @@ public:
 
 // Private Data Members
 private:
+
+    ///Cell name
+    String m_name; //GPuig
 
     /// Cell volume.
     units::Volume m_volume = units::um3(100);

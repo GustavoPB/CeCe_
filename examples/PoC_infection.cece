@@ -11,7 +11,7 @@
 
     <!-- Generate yeast cells -->
     <module name="object-generator">
-        <object class="cell.Yeast" rate="100/s" velocity="500um/s 0" volume="5um3" position-min="-95 45" position-max="-95 55">
+        <object name="paco" class="cell.Yeast" rate="100/s" velocity="500um/s 0" volume="5um3" position-min="-95 45" position-max="-95 55">
         	<molecule name="RFP" amount="1000" />
         	<molecule name="Y" amount="1000" />
         </object>

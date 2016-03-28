@@ -42,6 +42,13 @@ void CellBase::configure(const config::Configuration& config, simulator::Simulat
 {
     Object::configure(config, simulation);
 
+    //GPuig
+    if (config.has("name"))
+    {
+    setName(config.get("name"));
+    Log::debug("Pruebas!!: ", getName());
+    }
+
     // Initial volume
     setVolume(config.get("volume", getVolume()));
 
