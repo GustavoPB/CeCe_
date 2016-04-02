@@ -15,17 +15,17 @@
         	<molecule name="RFP" amount="1000" />
         	<molecule name="Y" amount="1000" />
         </object>
-   		<object class="cell.Cell" rate="50/s" velocity="500um/s 0" volume="2um3" position-min="-95 45" position-max="-95 55">
+        
+   		<object name="pepe" class="cell.Cell" rate="50/s" velocity="500um/s 0" volume="2um3" position-min="-95 45" position-max="-95 55">
    			<molecule name="GFP" amount="1000" />
         	<molecule name="P" amount="1000" />
         </object>
     </module>
     
-    <!-- Bond Cell - phage -->
-    <module name="infection">
-  		<bond ligand="P" receptor="Y" association-constant="50" disassociation-constant="75" />
-  		<parasite name="paco" infects="pepe" />
-	</module>-
+	<!-- Bond Cell - phage -->
+	<module name="infection">
+	<bond pathogen="paco" host="pepe" association-constant="50" disassociation-constant="75" />
+	</module>
 	
     <module name="streamlines" char-length="20" number-nodes="10" inlet-velocity="2000um/s" layout="barrier outlet barrier inlet"/>
 </simulation>

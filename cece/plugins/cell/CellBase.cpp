@@ -46,7 +46,6 @@ void CellBase::configure(const config::Configuration& config, simulator::Simulat
     if (config.has("name"))
     {
     setName(config.get("name"));
-    Log::debug("Pruebas!!: ", getName());
     }
 
     // Initial volume

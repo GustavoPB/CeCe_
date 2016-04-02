@@ -117,31 +117,21 @@ public:
     void EndContact(b2Contact* contact) override;
 
 
-// Private Structures
-private:
-
-
     /**
      * @brief Structure for storing bonds.
      */
     struct Bond
     {
+    	String pathogen;
+    	String host;
         RealType aConst;
         RealType dConst;
         String ligand; //TOREMOVE
         String receptor; //TOREMOVE
     };
 
-    /**
-     * @brief Structure for storing bonds.
-     */
-     struct Parasite
-     {
-        String name;
-        String infects;
-     };
-
-
+// Private Structures
+private:
     /**
      * @brief User data for joint.
      */
@@ -163,7 +153,6 @@ private:
         RealType dConst;
     };
 
-
 // Private Data Members
 private:
 
@@ -175,10 +164,9 @@ private:
 
     /// List of created bonds.
     DynamicArray<Bond> m_bonds;
-
-    /// List of created parasites.
-    DynamicArray<Parasite> m_parasites;
 };
+
+
 
 /* ************************************************************************ */
 
