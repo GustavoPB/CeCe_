@@ -170,6 +170,9 @@ void Module::update()
         if (dist(g_gen))
         {
             Log::debug("Released: ", joint->GetBodyA(), ", ", joint->GetBodyB());
+            //GPuig -- Stores the bodies whose contact is released
+            m_toRelease.push_back(JointDef{joint->GetBodyA(), joint->GetBodyB(), 0});
+            //GPuig
             toRemove.push_back(joint);
             delete jUserData;
         }
@@ -252,7 +255,7 @@ void Module::BeginContact(b2Contact* contact)
     	//GPuig
     	if (isInfectionPosible(m_bonds[i], ca.getName(), cb.getName()))
     	{
-
+    		//Nota: es necesario que el fago se introdujera siempre en la primera posicion de m_toJoin
         std::bernoulli_distribution dist1(getAssociationPropensity(m_step, m_bonds[i].aConst));
         if (dist1(g_gen))
         {
@@ -276,9 +279,27 @@ void Module::BeginContact(b2Contact* contact)
 
 /* ************************************************************************ */
 
-void Module::EndContact(b2Contact* contact)
+void Module::EndContact(b2Contact* contact) //No seria necesario argumento
 {
-    // Nothing to do?
+	for(auto releasedjoin : m_toRelease)
+	{
+		//GPuig
+		auto& simulation = getSimulation();
+		//Transformo a CellBase para capturar su nombre
+		auto& ca = static_cast<object::Object*>(releasedjoin.bodyA->GetUserData())->castThrow<plugin::cell::CellBase>();
+		auto& cb = static_cast<object::Object*>(releasedjoin.bodyB->GetUserData())->castThrow<plugin::cell::CellBase>();
+
+		//Consulto configuraciones para determinar el tipo
+
+		// Create object
+		auto object = simulation.buildObject("cell.Yeast");
+
+
+		//object->configure(desc.config, simulation);
+		//object->setPosition(pos);
+		//GPuig
+	}
+	m_toRelease.clear();
 }
 
 /* ************************************************************************ */

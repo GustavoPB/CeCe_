@@ -159,6 +159,9 @@ private:
     /// List of bodies to join
     DynamicArray<JointDef> m_toJoin;
 
+    //List of bodies to release
+    DynamicArray<JointDef> m_toRelease;
+
     /// Used time step.
     units::Duration m_step;
 
