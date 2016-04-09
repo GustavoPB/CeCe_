@@ -47,9 +47,11 @@
 #include "cece/core/Real.hpp"
 #include "cece/core/Tuple.hpp"
 #include "cece/module/Module.hpp"
+#include "cece/config/Configuration.hpp"
 
 // Plugins
 #include "cece/plugins/cell/CellBase.hpp"
+#include "cece/plugins/object-generator/Module.hpp"
 
 // Physics
 #include <Box2D/Box2D.h>
@@ -116,19 +118,33 @@ public:
      */
     void EndContact(b2Contact* contact) override;
 
-
     /**
      * @brief Structure for storing bonds.
      */
     struct Bond
     {
+    	String bondRef;
     	String pathogen;
     	String host;
         RealType aConst;
         RealType dConst;
-        String ligand; //TOREMOVE
-        String receptor; //TOREMOVE
+
+        //String ligand; //TOREMOVE
+        //String receptor; //TOREMOVE
     };
+
+    /**
+	 * @brief Structure for storing created object parameters.
+	 */
+	struct ObjectDesc
+	{
+		/// Object configuration
+		String bondRef;
+		String objectClass;
+		config::Configuration config;
+	};
+
+
 
 // Private Structures
 private:
@@ -141,7 +157,6 @@ private:
         Module* module;
         RealType Kd;
     };
-
 
     /**
      * @brief Joint definition.
@@ -167,6 +182,9 @@ private:
 
     /// List of created bonds.
     DynamicArray<Bond> m_bonds;
+
+    /// List of objects
+    DynamicArray<ObjectDesc> m_objects;
 };
 
 

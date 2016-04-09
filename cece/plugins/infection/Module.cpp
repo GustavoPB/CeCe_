@@ -89,11 +89,11 @@ RealType getAssociationPropensity(
  * @brief Defines whether the infections is possible (as it was declared in the simulation) or not
  */
 //Define si la infección se puede producir atendiendo a la configuración en simulación
-bool isInfectionPosible(Module::Bond bondDef, String nameA, String nameB)
+bool isInfectionDefined(Module::Bond bondDef, String nameA, String nameB)
 {
 	//Check whether any of the objects in the contact is a phage
 	//then if the other corresponds to a infectable cell (host)
-	int result = 0;
+	int result = false;
 
 	if(!nameA.empty()  && !nameB.empty())
 	{
@@ -101,7 +101,7 @@ bool isInfectionPosible(Module::Bond bondDef, String nameA, String nameB)
 		{
 			if (nameA == bondDef.host || nameB == bondDef.host)
 			{
-				result = 1;
+				result = true;
 			}
 		}
 	}
@@ -195,12 +195,25 @@ void Module::loadConfig(const config::Configuration& config)
     for (auto&& c_bond : config.getConfigurations("bond"))
     {
         m_bonds.push_back(Bond{
+        	c_bond.get("bond-reference"),
         	c_bond.get("pathogen"),
         	c_bond.get("host"),
             c_bond.get<RealType>("association-constant"),
             c_bond.get<RealType>("disassociation-constant")
         });
     }
+
+    //PoC - Store object types
+    for (auto&& cfg : config.getConfigurations("object"))
+        {
+    		/*ObjectDesc desc;
+    		desc.config = cfg.toMemory();*/
+    		m_objects.push_back(ObjectDesc{
+    			cfg.get("bond-reference"),
+    			cfg.get("class"),
+    			cfg.toMemory()});
+    		Log::debug("Captura");
+        }
 }
 
 /* ************************************************************************ */
@@ -232,28 +245,11 @@ void Module::BeginContact(b2Contact* contact)
         return;
     auto& ca = static_cast<object::Object*>(ba->GetUserData())->castThrow<plugin::cell::CellBase>();
     auto& cb = static_cast<object::Object*>(bb->GetUserData())->castThrow<plugin::cell::CellBase>();
-    //auto radius1 = ca.getShapes()[0].getCircle().radius; //TOREMOVE
-    //auto radius2 = cb.getShapes()[0].getCircle().radius; //TOREMOVE
-
-    /*EVOLUTIVO:
-     * Sustituir getMoleculeCount por una función que evalue el nombre:
-     * - Introducir GetName en CellBase.hpp -- Hecho!
-     * - Crear aqui funcion para evaluar si coinciden los nombres definidos en la simulación:
-     * 		Hay que cambiar la logica para que solo se detecte el virus como celula
-     * 		en realidad lo que tengo que dectar es que alguno de los dos elementos que intervienen en el
-     * 		contacto sean de tipo virus y el otro celula.
-     * 		O que los dos sean de tipo celula y evaluar la adecuación en downstream con una función posterior (no es muy buena
-     * 		solución porque para que hacerlo en dos etapas...pero la primera es sencilla?)
-     * 		==> crear una funcion de probabilidad que asocie una nula cuando no son del tipo adecuado. No solo esto sino que tb
-     * 		tiene que evaluar si los nobres coinciden  para poder instanciar el enlace. Puedo hacerlo en dos etapas?
-     * 		primero evaluar los tipos
-     * 		y luego ya los nombres dentro de la funcion de probabilidad??
-     */
 
     for (unsigned int i = 0; i < m_bonds.size(); i++)
     {
     	//GPuig
-    	if (isInfectionPosible(m_bonds[i], ca.getName(), cb.getName()))
+    	if (isInfectionDefined(m_bonds[i], ca.getName(), cb.getName()))
     	{
     		//Nota: es necesario que el fago se introdujera siempre en la primera posicion de m_toJoin
         std::bernoulli_distribution dist1(getAssociationPropensity(m_step, m_bonds[i].aConst));
@@ -264,42 +260,40 @@ void Module::BeginContact(b2Contact* contact)
             continue;
         }
     	}
-        /*std::bernoulli_distribution dist2(
-            getAssociationPropensity(m_step, radius1.value(), radius2.value(),
-                cb.getMoleculeCount(m_bonds[i].receptor), ca.getMoleculeCount(m_bonds[i].ligand),
-                m_bonds[i].aConst));
-        if (dist2(g_gen))
-        {
-            Log::debug("Joined: ", ba, ", ", bb);
-            m_toJoin.push_back(JointDef{ba, bb, m_bonds[i].dConst});
-            continue;
-        }*/
     }
 }
 
 /* ************************************************************************ */
 
-void Module::EndContact(b2Contact* contact) //No seria necesario argumento
+void Module::EndContact(b2Contact* contact)
 {
+
 	for(auto releasedjoin : m_toRelease)
 	{
 		//GPuig
 		auto& simulation = getSimulation();
-		//Transformo a CellBase para capturar su nombre
+
 		auto& ca = static_cast<object::Object*>(releasedjoin.bodyA->GetUserData())->castThrow<plugin::cell::CellBase>();
 		auto& cb = static_cast<object::Object*>(releasedjoin.bodyB->GetUserData())->castThrow<plugin::cell::CellBase>();
 
-		//Consulto configuraciones para determinar el tipo
+		for(auto&& bond : m_bonds)
+		{
+			if (isInfectionDefined(bond, ca.getName(), cb.getName()))
+			{
+				for(auto&& obj : m_objects)
+				{
+					if (bond.bondRef == obj.bondRef)
+					{
+						auto object = simulation.buildObject(obj.objectClass);
 
-		// Create object
-		auto object = simulation.buildObject("cell.Yeast");
-
-
-		//object->configure(desc.config, simulation);
-		//object->setPosition(pos);
-		//GPuig
+						object->configure(obj.config, simulation);
+					}
+				}
+			}
+		}
 	}
 	m_toRelease.clear();
+	//GPuig
 }
 
 /* ************************************************************************ */

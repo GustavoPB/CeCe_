@@ -24,7 +24,11 @@
     
 	<!-- Bond Cell - phage -->
 	<module name="infection">
-	<bond pathogen="paco" host="pepe" association-constant="50" disassociation-constant="75" />
+	<bond bond-reference="PACE" pathogen="paco" host="pepe" association-constant="50" disassociation-constant="75" />      
+	
+	<object bond-reference="PACE" name="pepe" class="cell.Cell" volume="2um3">
+		<molecule name="RFP" amount="1000" />
+    </object>
 	</module>
 	
     <module name="streamlines" char-length="20" number-nodes="10" inlet-velocity="2000um/s" layout="barrier outlet barrier inlet"/>
