@@ -70,18 +70,8 @@ std::default_random_engine g_gen(g_rd());
 
 RealType getAssociationPropensity(
     units::Duration step,
-    /*RealType radius1,
-    RealType radius2,
-    unsigned int numberOfRec1,
-    unsigned int numberOfRec2,*/
     RealType Ka)
 {
-	//Llamada a la función de evaluzación
-    /*TO REMOVE
-     *
-     return  getRelativeReceptorProportion(radius1, numberOfRec1) *
-            getRelativeReceptorProportion(radius2, numberOfRec2) *
-            (1 - std::exp(-Ka * step.value()));*/
 	return (1 - std::exp(-Ka * step.value()));
 }
 
@@ -145,10 +135,10 @@ void Module::update()
         world.CreateJoint(&joint);
     }
 
-    m_toJoin.clear();
-
     // Joints to remove
     DynamicArray<b2Joint*> toRemove;
+
+    int index = 0;
 
     // Foreach active joints
     for (auto joint = world.GetJointList(); joint != nullptr; joint = joint->GetNext())
@@ -156,9 +146,16 @@ void Module::update()
         const JointUserData* jUserData = reinterpret_cast<const JointUserData*>(joint->GetUserData());
         // Not our joint
         if (jUserData == nullptr)
-            continue;
+        {
+        	index++;
+        	continue;
+        }
+
         if (jUserData->guard != '@')
-            continue;
+        {
+			index++;
+			continue;
+		}
 
         std::bernoulli_distribution dist(
             getDisassociationPropensity(
@@ -171,16 +168,19 @@ void Module::update()
         {
             Log::debug("Released: ", joint->GetBodyA(), ", ", joint->GetBodyB());
             //GPuig -- Stores the bodies whose contact is released
-            m_toRelease.push_back(JointDef{joint->GetBodyA(), joint->GetBodyB(), 0});
+            m_toRelease.push_back(JointDef{m_toJoin[index].bondRef, joint->GetBodyA(), joint->GetBodyB(), 0});
             //GPuig
             toRemove.push_back(joint);
             delete jUserData;
         }
+        index++;
     }
 
     // Destroy joints
     for (auto joint : toRemove)
         world.DestroyJoint(joint);
+    // flush jointArray
+    m_toJoin.clear();
 }
 
 /* ************************************************************************ */
@@ -256,7 +256,7 @@ void Module::BeginContact(b2Contact* contact)
         if (dist1(g_gen))
         {
             Log::debug("Joined: ", ba, ", ", bb);
-            m_toJoin.push_back(JointDef{ba, bb, m_bonds[i].dConst});
+            m_toJoin.push_back(JointDef{m_bonds[i].bondRef, ba, bb, m_bonds[i].dConst});
             continue;
         }
     	}
@@ -278,7 +278,7 @@ void Module::EndContact(b2Contact* contact)
 
 		for(auto&& bond : m_bonds)
 		{
-			if (isInfectionDefined(bond, ca.getName(), cb.getName()))
+			if (bond.bondRef == releasedjoin.bondRef)
 			{
 				for(auto&& obj : m_objects)
 				{

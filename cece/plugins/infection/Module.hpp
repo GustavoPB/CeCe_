@@ -163,6 +163,7 @@ private:
      */
     struct JointDef
     {
+    	String bondRef;
         b2Body* bodyA;
         b2Body* bodyB;
         RealType dConst;
