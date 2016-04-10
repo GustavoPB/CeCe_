@@ -1,9 +1,9 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2015                                                    */
+/* LIA UPM (c) 2016                                                         */
 /* ************************************************************************ */
-/* Department of Cybernetics                                                */
-/* Faculty of Applied Sciences                                              */
-/* University of West Bohemia in Pilsen                                     */
+/* Department of Artifitial Intelligence                                    */
+/* Faculty of Informatics                                                   */
+/* Polytechnic University of Madrid - Spain                                 */
 /* ************************************************************************ */
 /*                                                                          */
 /* This file is part of CeCe.                                               */
@@ -45,7 +45,6 @@
 #include "cece/object/Object.hpp"
 
 #ifdef CECE_ENABLE_RENDER
-#include "cece/core/Log.hpp"//TOREMOVE
 #include "cece/render/Color.hpp"
 #endif
 
@@ -53,14 +52,14 @@
 
 namespace cece {
 namespace plugin {
-namespace cell {
+namespace parasite {
 
 /* ************************************************************************ */
 
 /**
- * @brief Base class for cells.
+ * @brief Base class for parasites.
  */
-class CellBase : public object::Object
+class ParasiteBase : public object::Object
 {
 
 
@@ -74,7 +73,7 @@ public:
     /// Signed version of molecule count.
     using MoleculeCountDifference = typename std::make_signed<MoleculeCount>::type;
 
-    /// Cell growth rate type.
+    /// parasite growth rate type.
     using GrowthRate = units::Inverse<units::Time>::type;
 
 #ifdef CECE_ENABLE_RENDER
@@ -94,7 +93,7 @@ public:
      * @param typeName
      * @param type
      */
-    explicit CellBase(simulator::Simulation& simulation, String typeName = "cell.CellBase",
+    explicit ParasiteBase(simulator::Simulation& simulation, String typeName = "parasite.ParasiteBase",
         object::Object::Type type = object::Object::Type::Dynamic)
         : object::Object(simulation, std::move(typeName), type)
     {
@@ -106,7 +105,7 @@ public:
 public:
 
     /** GPuig
-    * @brief Returns cell name.
+    * @brief Returns parasite name.
     *
     * @return Number of molecules.
     */
@@ -116,7 +115,7 @@ public:
     }
 
     /**
-     * @brief Returns cell volume.
+     * @brief Returns parasite volume.
      *
      * @return
      */
@@ -127,7 +126,7 @@ public:
 
 
     /**
-     * @brief Returns cell maximum volume.
+     * @brief Returns parasite maximum volume.
      *
      * @return
      */
@@ -138,7 +137,7 @@ public:
 
 
     /**
-     * @brief Returns cell growth rate.
+     * @brief Returns parasite growth rate.
      *
      * @return
      */
@@ -149,9 +148,9 @@ public:
 
 
     /**
-     * @brief Returns cell radius.
+     * @brief Returns parasite radius.
      *
-     * @note Only for cells with circle shape.
+     * @note Only for parasites with circle shape.
      *
      * @return
      */
@@ -189,7 +188,7 @@ public:
 #ifdef CECE_ENABLE_RENDER
 
     /**
-     * @brief Returns cell identification color.
+     * @brief Returns parasite identification color.
      *
      * @return
      */
@@ -260,7 +259,7 @@ public:
 public:
 
     /** GPuig
-    * @brief Set cell volume.
+    * @brief Set parasite volume.
     *
     * @param volume
     */
@@ -270,7 +269,7 @@ public:
     }
 
     /**
-     * @brief Set cell volume.
+     * @brief Set parasite volume.
      *
      * @param volume
      */
@@ -281,7 +280,7 @@ public:
 
 
     /**
-     * @brief Set cell maximum volume.
+     * @brief Set parasite maximum volume.
      *
      * @param volume
      */
@@ -292,7 +291,7 @@ public:
 
 
     /**
-     * @brief Set cell growth rate.
+     * @brief Set parasite growth rate.
      *
      * @param rate
      */
@@ -361,7 +360,7 @@ public:
 #ifdef CECE_ENABLE_RENDER
 
     /**
-     * @brief Set cell identification color.
+     * @brief Set parasite identification color.
      *
      * @param color New color.
      */
@@ -433,7 +432,7 @@ public:
 
 
     /**
-     * @brief Kill current cell.
+     * @brief Kill current parasite.
      */
     void kill()
     {
@@ -451,7 +450,7 @@ public:
 
 
     /**
-     * @brief Update cell state.
+     * @brief Update parasite state.
      *
      * @param dt Time step.
      */
@@ -459,9 +458,9 @@ public:
 
 
     /**
-     * @brief Calculate radius for sphere shapes - from cell volume.
+     * @brief Calculate radius for sphere shapes - from parasite volume.
      *
-     * @param volume Cell volume.
+     * @param volume parasite volume.
      *
      * @return Radius.
      */
@@ -502,16 +501,16 @@ public:
 // Private Data Members
 private:
 
-    ///Cell name
+    ///parasite name
     String m_name; //GPuig
 
-    /// Cell volume.
+    /// parasite volume.
     units::Volume m_volume = units::um3(100);
 
-    /// Cell maximum volume.
+    /// parasite maximum volume.
     units::Volume m_volumeMax = units::um3(100);
 
-    /// Cell growth rate.
+    /// parasite growth rate.
     GrowthRate m_growthRate = Zero;
 
     /// Map of molecules.
@@ -533,7 +532,7 @@ private:
     /// BFP saturation.
     FluorescentSaturation m_bfpSaturation{20};
 
-    /// Cell identification color.
+    /// parasite identification color.
     render::Color m_identificationColor = render::colors::TRANSPARENT;
 #endif
 

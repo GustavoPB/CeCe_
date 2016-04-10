@@ -1,9 +1,9 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2015                                                    */
+/* LIA UPM (c) 2016                                                         */
 /* ************************************************************************ */
-/* Department of Cybernetics                                                */
-/* Faculty of Applied Sciences                                              */
-/* University of West Bohemia in Pilsen                                     */
+/* Department of Artifitial Intelligence                                    */
+/* Faculty of Informatics                                                   */
+/* Polytechnic University of Madrid - Spain                                 */
 /* ************************************************************************ */
 /*                                                                          */
 /* This file is part of CeCe.                                               */
@@ -24,7 +24,7 @@
 /* ************************************************************************ */
 
 // Declaration
-#include "cece/plugins/cell/CellBase.hpp"
+#include "cece/plugins/parasite/ParasiteBase.hpp"
 
 // CeCe
 #include "cece/core/Units.hpp"
@@ -34,11 +34,11 @@
 
 namespace cece {
 namespace plugin {
-namespace cell {
+namespace parasite {
 
 /* ************************************************************************ */
 
-void CellBase::configure(const config::Configuration& config, simulator::Simulation& simulation)
+void ParasiteBase::configure(const config::Configuration& config, simulator::Simulation& simulation)
 {
     Object::configure(config, simulation);
 
@@ -74,7 +74,7 @@ void CellBase::configure(const config::Configuration& config, simulator::Simulat
 
 /* ************************************************************************ */
 
-void CellBase::update(units::Time dt)
+void ParasiteBase::update(units::Time dt)
 {
     // Volume change
     const units::Volume dV = getGrowthRate() * (getVolumeMax() - getVolume()) * dt;
@@ -88,7 +88,7 @@ void CellBase::update(units::Time dt)
 /* ************************************************************************ */
 
 #ifdef CECE_ENABLE_RENDER
-render::Color CellBase::calcFluorescentColor(const units::Volume volume) const noexcept
+render::Color ParasiteBase::calcFluorescentColor(const units::Volume volume) const noexcept
 {
     const auto gfp = getMoleculeCount("GFP");
     const auto rfp = getMoleculeCount("RFP");
