@@ -56,11 +56,16 @@
 
 // Box2D
 #ifdef CECE_ENABLE_BOX2D_PHYSICS
-#  include <Box2D/Box2D.h>
 #  include "cece/simulator/ConverterBox2D.hpp"
 #endif
 
 /* ************************************************************************ */
+
+#ifdef CECE_ENABLE_BOX2D_PHYSICS
+class b2Body;
+class b2Shape;
+class b2Joint;
+#endif
 
 namespace cece { namespace simulator { class Simulation; } }
 namespace cece { namespace config { class Configuration; } }
@@ -758,10 +763,7 @@ public:
     /**
      * @brief Initialize shapes for physics engine.
      */
-    virtual void initShapes()
-    {
-        // Nothing to do
-    }
+    virtual void initShapes();
 
 
 #ifdef CECE_ENABLE_RENDER
@@ -826,6 +828,9 @@ private:
 
     /// Joint for pinned body.
     b2Joint* m_pinJoint = nullptr;
+
+    /// Body shapes.
+    DynamicArray<UniquePtr<b2Shape>> m_bodyShapes;
 
 #else
 
