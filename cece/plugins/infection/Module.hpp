@@ -64,11 +64,61 @@ namespace infection {
 
 /* ************************************************************************ */
 
+
+
 /**
  * @brief Module for infection.
  */
 class Module : public module::Module, public b2ContactListener
 {
+
+// Private Structures
+private:
+
+	/**
+	* @brief Structure for storing bonds.
+	*/
+	struct Bond
+	{
+		String bondRef;
+		String pathogen;
+		String host;
+		RealType aConst;
+		RealType dConst;
+	};
+
+
+    /**
+	 * @brief Structure for storing created object parameters.
+	 */
+	struct ObjectDesc
+	{
+		/// Object configuration
+		String bondRef;
+		String objectClass;
+		config::Configuration config;
+	};
+
+	/**
+	 * @brief User data for joint.
+	 */
+	struct JointUserData
+	{
+		const char guard = '@';
+		Module* module;
+		RealType Kd;
+	};
+
+	/**
+	 * @brief Joint definition.
+	 */
+	struct JointDef
+	{
+		String bondRef;
+		b2Body* bodyA;
+		b2Body* bodyB;
+		RealType dConst;
+	};
 
 // Public Ctors & Dtors
 public:
@@ -118,56 +168,55 @@ public:
      */
     void EndContact(b2Contact* contact) override;
 
-    /**
-     * @brief Structure for storing bonds.
-     */
-    struct Bond
-    {
-    	String bondRef;
-    	String pathogen;
-    	String host;
-        RealType aConst;
-        RealType dConst;
-
-        //String ligand; //TOREMOVE
-        //String receptor; //TOREMOVE
-    };
-
-    /**
-	 * @brief Structure for storing created object parameters.
+    /*
+	 * @brief Gets the bond's Reference according to the bond's definition in simulation file
+	 * @note if the names of the objects does not correspond to a bond definition "NO_DEFINED tag will be returned"
 	 */
-	struct ObjectDesc
-	{
-		/// Object configuration
-		String bondRef;
-		String objectClass;
-		config::Configuration config;
-	};
-
-
-
-// Private Structures
-private:
-    /**
-     * @brief User data for joint.
-     */
-    struct JointUserData
+    String getBondRefFromObjects(b2Body* bodyA, b2Body* bodyB)
     {
-        const char guard = '@';
-        Module* module;
-        RealType Kd;
-    };
+    	auto& ca = static_cast<object::Object*>(bodyA->GetUserData())->castThrow<plugin::cell::CellBase>();
+    	auto& cb = static_cast<object::Object*>(bodyB->GetUserData())->castThrow<plugin::cell::CellBase>();
 
-    /**
-     * @brief Joint definition.
+    	String nameA = ca.getName();
+    	String nameB = cb.getName();
+
+    	String result = "NO_DEFINED";
+
+    	for(auto&& bond : m_bonds)
+    	{
+    		if (isInfectionDefined(bond, nameA, nameB))
+    		{
+    			result = bond.bondRef;
+    			break;
+    		}
+    	}
+
+    	return result;
+    }
+
+    /*
+     * @brief Defines whether the infections is possible (as it was declared in the simulation) or not
      */
-    struct JointDef
+    //Define si la infección se puede producir atendiendo a la configuración en simulación
+    bool isInfectionDefined(Bond bondDef, String nameA, String nameB)
     {
-    	String bondRef;
-        b2Body* bodyA;
-        b2Body* bodyB;
-        RealType dConst;
-    };
+    	//Check whether any of the objects in the contact is a phage
+    	//then if the other corresponds to a infectable cell (host)
+    	int result = false;
+
+    	if(!nameA.empty()  && !nameB.empty())
+    	{
+    		if (nameA == bondDef.pathogen || nameB == bondDef.pathogen)
+    		{
+    			if (nameA == bondDef.host || nameB == bondDef.host)
+    			{
+    				result = true;
+    			}
+    		}
+    	}
+    	return result;
+    }
+
 
 // Private Data Members
 private:

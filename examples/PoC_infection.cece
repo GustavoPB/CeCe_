@@ -27,7 +27,7 @@
 	<bond bond-reference="PACE" pathogen="paco" host="pepe" association-constant="50" disassociation-constant="75" />      
 	
 	<object bond-reference="PACE" name="pepe" class="cell.Cell" volume="2um3">
-		<molecule name="RFP" amount="1000" />
+		<molecule name="YFP" amount="1000" />
     </object>
 	</module>
 	

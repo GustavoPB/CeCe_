@@ -75,28 +75,6 @@ RealType getAssociationPropensity(
 	return (1 - std::exp(-Ka * step.value()));
 }
 
-/*
- * @brief Defines whether the infections is possible (as it was declared in the simulation) or not
- */
-//Define si la infección se puede producir atendiendo a la configuración en simulación
-bool isInfectionDefined(Module::Bond bondDef, String nameA, String nameB)
-{
-	//Check whether any of the objects in the contact is a phage
-	//then if the other corresponds to a infectable cell (host)
-	int result = false;
-
-	if(!nameA.empty()  && !nameB.empty())
-	{
-		if (nameA == bondDef.pathogen || nameB == bondDef.pathogen)
-		{
-			if (nameA == bondDef.host || nameB == bondDef.host)
-			{
-				result = true;
-			}
-		}
-	}
-	return result;
-}
 
 /* ************************************************************************ */
 
@@ -135,10 +113,11 @@ void Module::update()
         world.CreateJoint(&joint);
     }
 
+    // flush jointArray
+    m_toJoin.clear();
+
     // Joints to remove
     DynamicArray<b2Joint*> toRemove;
-
-    int index = 0;
 
     // Foreach active joints
     for (auto joint = world.GetJointList(); joint != nullptr; joint = joint->GetNext())
@@ -147,13 +126,11 @@ void Module::update()
         // Not our joint
         if (jUserData == nullptr)
         {
-        	index++;
         	continue;
         }
 
         if (jUserData->guard != '@')
         {
-			index++;
 			continue;
 		}
 
@@ -168,19 +145,17 @@ void Module::update()
         {
             Log::debug("Released: ", joint->GetBodyA(), ", ", joint->GetBodyB());
             //GPuig -- Stores the bodies whose contact is released
-            m_toRelease.push_back(JointDef{m_toJoin[index].bondRef, joint->GetBodyA(), joint->GetBodyB(), 0});
+            String bondRef = getBondRefFromObjects(joint->GetBodyA(), joint->GetBodyB());
+            m_toRelease.push_back(JointDef{bondRef, joint->GetBodyA(), joint->GetBodyB(), 0});
             //GPuig
             toRemove.push_back(joint);
             delete jUserData;
         }
-        index++;
     }
 
     // Destroy joints
     for (auto joint : toRemove)
         world.DestroyJoint(joint);
-    // flush jointArray
-    m_toJoin.clear();
 }
 
 /* ************************************************************************ */
@@ -287,6 +262,17 @@ void Module::EndContact(b2Contact* contact)
 						auto object = simulation.buildObject(obj.objectClass);
 
 						object->configure(obj.config, simulation);
+
+						PositionVector pos;
+						if (ca.getName() == bond.host)
+						{
+							pos = ca.getPosition();
+						}
+						else
+						{
+							pos = cb.getPosition();
+						}
+						object->setPosition(pos);
 					}
 				}
 			}
