@@ -83,6 +83,7 @@ private:
 		String bondRef;
 		String pathogen;
 		String host;
+		RealType maxProdAmount;
 		RealType aConst;
 		RealType dConst;
 	};

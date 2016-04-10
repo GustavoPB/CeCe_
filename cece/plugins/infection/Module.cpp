@@ -173,13 +173,14 @@ void Module::loadConfig(const config::Configuration& config)
         	c_bond.get("bond-reference"),
         	c_bond.get("pathogen"),
         	c_bond.get("host"),
+			c_bond.get<RealType>("max-production-amount"),
             c_bond.get<RealType>("association-constant"),
             c_bond.get<RealType>("disassociation-constant")
         });
     }
 
     //PoC - Store object types
-    for (auto&& cfg : config.getConfigurations("object"))
+    for (auto&& cfg : config.getConfigurations("production"))
         {
     		/*ObjectDesc desc;
     		desc.config = cfg.toMemory();*/
@@ -187,7 +188,6 @@ void Module::loadConfig(const config::Configuration& config)
     			cfg.get("bond-reference"),
     			cfg.get("class"),
     			cfg.toMemory()});
-    		Log::debug("Captura");
         }
 }
 
@@ -201,8 +201,10 @@ void Module::storeConfig(config::Configuration& config) const
     for (const auto& bond : m_bonds)
     {
         auto bondConfig = config.addConfiguration("bond");
+        bondConfig.set("bond-reference", bond.pathogen);
         bondConfig.set("pathogen", bond.pathogen);
         bondConfig.set("host", bond.host);
+        bondConfig.set("max-production-amount", bond.pathogen);
         bondConfig.set("association-constant", bond.aConst);
         bondConfig.set("disassociation-constant", bond.dConst);
     }
@@ -248,8 +250,11 @@ void Module::EndContact(b2Contact* contact)
 		//GPuig
 		auto& simulation = getSimulation();
 
-		auto& ca = static_cast<object::Object*>(releasedjoin.bodyA->GetUserData())->castThrow<plugin::cell::CellBase>();
-		auto& cb = static_cast<object::Object*>(releasedjoin.bodyB->GetUserData())->castThrow<plugin::cell::CellBase>();
+		auto oa = static_cast<object::Object*>(releasedjoin.bodyA->GetUserData());
+		auto ob = static_cast<object::Object*>(releasedjoin.bodyB->GetUserData());
+
+		auto& ca = oa->castThrow<plugin::cell::CellBase>();
+		auto& cb = ob->castThrow<plugin::cell::CellBase>();
 
 		for(auto&& bond : m_bonds)
 		{
@@ -259,20 +264,27 @@ void Module::EndContact(b2Contact* contact)
 				{
 					if (bond.bondRef == obj.bondRef)
 					{
-						auto object = simulation.buildObject(obj.objectClass);
+						auto phageAmount = bond.maxProdAmount;//TODO: should add a function of probability
 
-						object->configure(obj.config, simulation);
+						for (unsigned int i = 0; i < phageAmount; i++)
+						{
+							auto object = simulation.buildObject(obj.objectClass);
 
-						PositionVector pos;
-						if (ca.getName() == bond.host)
-						{
-							pos = ca.getPosition();
+							object->configure(obj.config, simulation);
+
+							PositionVector pos;
+							if (ca.getName() == bond.host)
+							{
+								pos = ca.getPosition();
+								//simulation.deleteObject(oa);
+							}
+							else
+							{
+								pos = cb.getPosition();
+								//simulation.deleteObject(ob);
+							}
+							object->setPosition(pos);
 						}
-						else
-						{
-							pos = cb.getPosition();
-						}
-						object->setPosition(pos);
 					}
 				}
 			}
