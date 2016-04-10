@@ -1,9 +1,9 @@
 # ######################################################################### #
-# Georgiev Lab (c) 2015-2016                                                #
+# LIA UPM (c) 2016                                                          #
 # ######################################################################### #
-# Department of Cybernetics                                                 #
-# Faculty of Applied Sciences                                               #
-# University of West Bohemia in Pilsen                                      #
+# Department of Artifitial Intelligence                                     #
+# Faculty of Informatics                                                    #
+# Polytechnic University of Madrid - Spain                                  #
 # ######################################################################### #
 #                                                                           #
 # This file is part of CeCe.                                                #
@@ -25,36 +25,36 @@
 
 # Sources
 set(SRCS
-    Plugin.cpp
-    CellBase.hpp
-    CellBase.cpp
-    Cell.hpp
-    Cell.cpp
-    Yeast.hpp
-    Yeast.cpp
+#    Plugin.cpp
+    ParasiteBase.hpp
+    ParasiteBase.cpp
+#    Cell.hpp
+#    Cell.cpp
+#    Yeast.hpp
+#    Yeast.cpp
     StoreMolecules.hpp
     StoreMolecules.cpp
 )
 
 if (CONFIG_RENDER_ENABLE)
     set(SRCS ${SRCS}
-        DrawableCell.hpp
-        DrawableCell.cpp
-        DrawableYeast.hpp
-        DrawableYeast.cpp
+#        DrawableCell.hpp
+#        DrawableCell.cpp
+#        DrawableYeast.hpp
+#        DrawableYeast.cpp
 
         # Shaders
-        vs.cell.hpp
-        fs.cell.hpp
-        vs.yeast.hpp
-        fs.yeast.hpp
+#        vs.cell.hpp
+#        fs.cell.hpp
+#        vs.yeast.hpp
+#        fs.yeast.hpp
     )
 endif ()
 
 # ######################################################################### #
 
 # Build plugin
-build_plugin(cell
+build_plugin(parasite
     SOURCES ${SRCS}
 )
 
