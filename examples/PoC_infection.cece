@@ -3,6 +3,7 @@
 <simulation world-size="200um 150um" dt="1ms" background="white" length-coefficient="1e-1">
 
     <plugin name="cell" />
+    <plugin name="parasite" />
     <plugin name="object-generator" />
     <plugin name="streamlines" />
     <plugin name="chemostat" pipe-top="20um" pipe-radius="5um" size="80um" visible="true" isSymmetric="false"/>
@@ -16,7 +17,7 @@
         	<molecule name="Y" amount="1000" />
         </object>
         
-   		<object name="pepe" class="cell.Cell" rate="50/s" velocity="500um/s 0" volume="2um3" position-min="-95 45" position-max="-95 55">
+   		<object name="pepe" class="parasite.Phage" rate="50/s" velocity="500um/s 0" volume="2um3" position-min="-95 45" position-max="-95 55">
    			<molecule name="GFP" amount="1000" />
         	<molecule name="P" amount="1000" />
         </object>
@@ -26,10 +27,10 @@
 	<module name="infection">
 	<bond bond-reference="PACE" pathogen="paco" host="pepe"  max-production-amount="3" association-constant="15" disassociation-constant="50" />      
 	
-	<production bond-reference="PACE" name="pepe" class="cell.Cell" volume="2um3">
+	<production bond-reference="PACE" name="pepe" class="parasite.Phage" volume="2um3">
 		<molecule name="BFP" amount="1000" />
     </production>
 	</module>
 	
-    <module name="streamlines" char-length="20" number-nodes="10" inlet-velocity="2000um/s" layout="barrier outlet barrier inlet"/>
+    <module name="streamlines" char-length="20" number-nodes="10" inlet-velocity="3000um/s" layout="barrier outlet barrier inlet"/>
 </simulation>

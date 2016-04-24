@@ -51,6 +51,7 @@
 
 // Plugins
 #include "cece/plugins/cell/CellBase.hpp"
+#include "cece/plugins/parasite/ParasiteBase.hpp"
 #include "cece/plugins/object-generator/Module.hpp"
 
 // Physics
@@ -175,11 +176,32 @@ public:
 	 */
     String getBondRefFromObjects(b2Body* bodyA, b2Body* bodyB)
     {
-    	auto& ca = static_cast<object::Object*>(bodyA->GetUserData())->castThrow<plugin::cell::CellBase>();
-    	auto& cb = static_cast<object::Object*>(bodyB->GetUserData())->castThrow<plugin::cell::CellBase>();
+    	//auto& ca = static_cast<object::Object*>(bodyA->GetUserData())->castThrow<plugin::cell::CellBase>();
+    	//auto& cb = static_cast<object::Object*>(bodyB->GetUserData())->castThrow<plugin::cell::CellBase>();
+    	auto oa = static_cast<object::Object*>(bodyA->GetUserData());
+    	auto ob = static_cast<object::Object*>(bodyB->GetUserData());
 
-    	String nameA = ca.getName();
-    	String nameB = cb.getName();
+    	plugin::cell::CellBase* ca = NULL;
+    	plugin::parasite::ParasiteBase* cb = NULL;
+    	if(oa->is<plugin::cell::CellBase>())
+    	{
+    		ca = dynamic_cast<plugin::cell::CellBase*>(oa);
+    	}
+    	else
+    	{
+    		cb = dynamic_cast<plugin::parasite::ParasiteBase*>(oa);
+    	}
+   		if(ob->is<plugin::cell::CellBase>())
+   		{
+   			ca = dynamic_cast<plugin::cell::CellBase*>(ob);
+    	}
+    	else
+    	{
+    		cb = dynamic_cast<plugin::parasite::ParasiteBase*>(ob);
+    	}
+
+    	String nameA = ca->getName();
+    	String nameB = cb->getName();
 
     	String result = "NO_DEFINED";
 

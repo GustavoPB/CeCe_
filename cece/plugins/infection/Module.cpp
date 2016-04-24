@@ -218,15 +218,35 @@ void Module::BeginContact(b2Contact* contact)
     auto bb = contact->GetFixtureB()->GetBody();
     auto oa = static_cast<object::Object*>(ba->GetUserData());
     auto ob = static_cast<object::Object*>(bb->GetUserData());
-    if (!oa->is<plugin::cell::CellBase>() || !ob->is<plugin::cell::CellBase>())
-        return;
-    auto& ca = static_cast<object::Object*>(ba->GetUserData())->castThrow<plugin::cell::CellBase>();
-    auto& cb = static_cast<object::Object*>(bb->GetUserData())->castThrow<plugin::cell::CellBase>();
+
+    //TOREVIEW: Need for distinct types (!= xor doesnt work ???)
+    if (oa->is<plugin::cell::CellBase>() == ob->is<plugin::cell::CellBase>() ||
+		oa->is<plugin::parasite::ParasiteBase>() == ob->is<plugin::parasite::ParasiteBase>())
+            return;
+
+    plugin::cell::CellBase* ca = NULL;
+    plugin::parasite::ParasiteBase* cb = NULL;
+    if(oa->is<plugin::cell::CellBase>())
+    {
+    	ca = dynamic_cast<plugin::cell::CellBase*>(oa);
+ 	}
+    else
+    {
+    	cb = dynamic_cast<plugin::parasite::ParasiteBase*>(oa);
+    }
+  	if(ob->is<plugin::cell::CellBase>())
+    {
+    	ca = dynamic_cast<plugin::cell::CellBase*>(ob);
+    }
+    else
+    {
+    	cb = dynamic_cast<plugin::parasite::ParasiteBase*>(ob);
+    }
 
     for (unsigned int i = 0; i < m_bonds.size(); i++)
     {
     	//GPuig
-    	if (isInfectionDefined(m_bonds[i], ca.getName(), cb.getName()))
+    	if (isInfectionDefined(m_bonds[i], ca->getName(), cb->getName()))
     	{
     		//Nota: es necesario que el fago se introdujera siempre en la primera posicion de m_toJoin
         std::bernoulli_distribution dist1(getAssociationPropensity(m_step, m_bonds[i].aConst));
@@ -253,8 +273,16 @@ void Module::EndContact(b2Contact* contact)
 		auto oa = static_cast<object::Object*>(releasedjoin.bodyA->GetUserData());
 		auto ob = static_cast<object::Object*>(releasedjoin.bodyB->GetUserData());
 
-		auto& ca = oa->castThrow<plugin::cell::CellBase>();
-		auto& cb = ob->castThrow<plugin::cell::CellBase>();
+		plugin::cell::CellBase* ca = NULL;
+
+		if(oa->is<plugin::cell::CellBase>())
+		{
+			ca = dynamic_cast<plugin::cell::CellBase*>(oa);
+		}
+		else
+		{
+			ca = dynamic_cast<plugin::cell::CellBase*>(ob);
+		}
 
 		for(auto&& bond : m_bonds)
 		{
@@ -273,16 +301,8 @@ void Module::EndContact(b2Contact* contact)
 							object->configure(obj.config, simulation);
 
 							PositionVector pos;
-							if (ca.getName() == bond.host)
-							{
-								pos = ca.getPosition();
-								//simulation.deleteObject(oa);
-							}
-							else
-							{
-								pos = cb.getPosition();
-								//simulation.deleteObject(ob);
-							}
+							pos = ca->getPosition();//ca is always the host
+
 							object->setPosition(pos);
 						}
 					}
