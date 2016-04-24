@@ -25,29 +25,23 @@
 
 # Sources
 set(SRCS
-#    Plugin.cpp
+    Plugin.cpp
     ParasiteBase.hpp
     ParasiteBase.cpp
-#    Cell.hpp
-#    Cell.cpp
-#    Yeast.hpp
-#    Yeast.cpp
+    Phage.hpp
+    Phage.cpp
     StoreMolecules.hpp
     StoreMolecules.cpp
 )
 
 if (CONFIG_RENDER_ENABLE)
     set(SRCS ${SRCS}
-#        DrawableCell.hpp
-#        DrawableCell.cpp
-#        DrawableYeast.hpp
-#        DrawableYeast.cpp
+        DrawablePhage.hpp
+        DrawablePhage.cpp
 
         # Shaders
-#        vs.cell.hpp
-#        fs.cell.hpp
-#        vs.yeast.hpp
-#        fs.yeast.hpp
+        vs.phage.hpp
+        fs.phage.hpp
     )
 endif ()
 

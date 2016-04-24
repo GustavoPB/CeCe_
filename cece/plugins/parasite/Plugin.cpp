@@ -29,8 +29,7 @@
 #include "cece/plugin/Context.hpp"
 
 // Plugin
-//#include "Yeast.hpp"
-//#include "Cell.hpp"
+#include "Phage.hpp"
 #include "StoreMolecules.hpp"
 
 /* ************************************************************************ */
@@ -53,9 +52,8 @@ class ParasiteApi : public plugin::Api
      */
     void onLoad(plugin::Context& context) override
     {
-//        context.registerObject<Cell>("cell.Cell");
-//        context.registerObject<Yeast>("cell.Yeast");
-//        context.registerProgram<StoreMolecules>("cell.store-molecules");
+        context.registerObject<Phage>("parasite.Phage");
+        context.registerProgram<StoreMolecules>("parasite.store-molecules");
     }
 
 
@@ -66,9 +64,8 @@ class ParasiteApi : public plugin::Api
      */
     void onUnload(plugin::Context& context) override
     {
-//        context.unregisterProgram("cell.store-molecules");
-//        context.unregisterObject("cell.Cell");
-//        context.unregisterObject("cell.Yeast");
+        context.unregisterProgram("parasite.store-molecules");
+        context.unregisterObject("parasite.Phage");
     }
 
 };
