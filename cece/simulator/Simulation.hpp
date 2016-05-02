@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2015                                                    */
+/* Georgiev Lab (c) 2015-2016                                               */
 /* ************************************************************************ */
 /* Department of Cybernetics                                                */
 /* Faculty of Applied Sciences                                              */
@@ -32,24 +32,18 @@
 
 /* ************************************************************************ */
 
-// C++
-#include <cassert>
-#include <functional>
-
 // CeCe
+#include "cece/core/Assert.hpp"
 #include "cece/core/Real.hpp"
 #include "cece/core/Units.hpp"
 #include "cece/core/UnitsCtors.hpp"
 #include "cece/core/Vector.hpp"
-#include "cece/core/Log.hpp"
+#include "cece/core/VectorUnits.hpp"
 #include "cece/core/String.hpp"
 #include "cece/core/Map.hpp"
-#include "cece/core/Pair.hpp"
 #include "cece/core/UniquePtr.hpp"
 #include "cece/core/ViewPtr.hpp"
 #include "cece/core/FilePath.hpp"
-#include "cece/core/InStream.hpp"
-#include "cece/core/DynamicArray.hpp"
 #include "cece/core/TimeMeasurement.hpp"
 #include "cece/core/DataTable.hpp"
 #include "cece/core/Parameters.hpp"
@@ -64,23 +58,17 @@
 #include "cece/object/TypeContainer.hpp"
 #include "cece/program/Program.hpp"
 #include "cece/program/NamedContainer.hpp"
-#include "cece/plugin/Library.hpp"
 #include "cece/simulator/IterationType.hpp"
 
 #ifdef CECE_ENABLE_RENDER
-#include "cece/render/Context.hpp"
 #include "cece/render/Color.hpp"
-#endif
-
-// Box2D
-#ifdef CECE_ENABLE_BOX2D_PHYSICS
-#  include <Box2D/Box2D.h>
-#  include "ConverterBox2D.hpp"
 #endif
 
 /* ************************************************************************ */
 
+class b2World;
 namespace cece { namespace plugin { class Context; } }
+namespace cece { namespace plugin { class Api; } }
 namespace cece { namespace config { class Configuration; } }
 
 /* ************************************************************************ */
@@ -326,7 +314,7 @@ public:
         if (!module)
             return nullptr;
 
-        assert(dynamic_cast<ModuleType*>(module.get()));
+        Assert(dynamic_cast<ModuleType*>(module.get()));
         return static_cast<ModuleType*>(module.get());
     }
 
@@ -469,7 +457,7 @@ public:
      */
     b2World& getWorld() noexcept
     {
-        return m_world;
+        return *m_world;
     }
 
 
@@ -480,7 +468,7 @@ public:
      */
     const b2World& getWorld() const noexcept
     {
-        return m_world;
+        return *m_world;
     }
 
 
@@ -489,32 +477,7 @@ public:
      *
      * @return
      */
-    units::Time getPhysicsEngineTimeStep() const noexcept
-    {
-        return m_converter.getTimeStepBox2D();
-    }
-
-
-    /**
-     * @brief Returns Box2D units converter.
-     *
-     * @return
-     */
-    ConverterBox2D& getConverter() noexcept
-    {
-        return m_converter;
-    }
-
-
-    /**
-     * @brief Returns Box2D units converter.
-     *
-     * @return
-     */
-    const ConverterBox2D& getConverter() const noexcept
-    {
-        return m_converter;
-    }
+    units::Time getPhysicsEngineTimeStep() const noexcept;
 
 #endif
 
@@ -524,14 +487,7 @@ public:
      *
      * @return
      */
-    units::Length getMaxObjectTranslation() const noexcept
-    {
-#ifdef CECE_ENABLE_BOX2D_PHYSICS
-        return m_converter.getMaxObjectTranslation();
-#else
-        return units::Length{1e3};
-#endif
-    }
+    units::Length getMaxObjectTranslation() const noexcept;
 
 
 #if defined(CECE_ENABLE_RENDER) && defined(CECE_ENABLE_BOX2D_PHYSICS) && defined(CECE_ENABLE_BOX2D_PHYSICS_DEBUG)
@@ -705,17 +661,7 @@ public:
      *
      * @param dt Time step.
      */
-    void setTimeStep(units::Time dt)
-    {
-        if (dt == Zero)
-            throw InvalidArgumentException("Time step cannot be zero");
-
-        m_timeStep = dt;
-
-#ifdef CECE_ENABLE_BOX2D_PHYSICS
-        m_converter.setTimeStep(dt);
-#endif
-    }
+    void setTimeStep(units::Time dt);
 
 
     /**
@@ -905,10 +851,7 @@ public:
      *
      * @param dt Time step.
      */
-    void setPhysicsEngineTimeStep(units::Time dt) noexcept
-    {
-        m_converter.setTimeStepBox2D(dt);
-    }
+    void setPhysicsEngineTimeStep(units::Time dt) noexcept;
 
 #endif
 
@@ -1165,10 +1108,7 @@ private:
 
 #ifdef CECE_ENABLE_BOX2D_PHYSICS
     /// Box2D world
-    b2World m_world;
-
-    // Box2D units converter.
-    ConverterBox2D m_converter;
+    UniquePtr<b2World> m_world;
 #endif
 
     /// Simulation objects.

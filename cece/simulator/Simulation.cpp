@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <chrono>
 #include <fstream>
+#include <iterator>
 #include <iomanip>
 
 // CeCe
@@ -39,6 +40,7 @@
 #include "cece/core/Exception.hpp"
 #include "cece/core/OutStream.hpp"
 #include "cece/core/FileStream.hpp"
+#include "cece/core/UnitIo.hpp"
 #include "cece/object/FactoryManager.hpp"
 #include "cece/plugin/Library.hpp"
 #include "cece/plugin/Api.hpp"
@@ -46,6 +48,10 @@
 #include "cece/config/Exception.hpp"
 #include "cece/module/FactoryManager.hpp"
 #include "cece/simulator/TimeMeasurement.hpp"
+
+#ifdef CECE_ENABLE_BOX2D_PHYSICS
+#include "cece/simulator/ConverterBox2D.hpp"
+#endif
 
 /* ************************************************************************ */
 
@@ -138,7 +144,7 @@ Simulation::Simulation(plugin::Context& context, FilePath path) noexcept
     : m_pluginContext(context)
     , m_fileName(std::move(path))
 #ifdef CECE_ENABLE_BOX2D_PHYSICS
-    , m_world{b2Vec2{0.0f, 0.0f}}
+    , m_world{makeUnique<b2World>(b2Vec2{0.0f, 0.0f})}
 #endif
 {
     // Nothing to do
@@ -164,7 +170,7 @@ Simulation::~Simulation()
 AccelerationVector Simulation::getGravity() const noexcept
 {
 #ifdef CECE_ENABLE_BOX2D_PHYSICS
-    return m_converter.convertLinearAcceleration(m_world.GetGravity());
+    return ConverterBox2D::getInstance().convertLinearAcceleration(m_world->GetGravity());
 #else
     return AccelerationVector{Zero};
 #endif
@@ -190,6 +196,20 @@ UniquePtr<InOutStream> Simulation::getResource(const String& name) noexcept
 
 /* ************************************************************************ */
 
+void Simulation::setTimeStep(units::Time dt)
+{
+    if (dt == Zero)
+        throw InvalidArgumentException("Time step cannot be zero");
+
+    m_timeStep = dt;
+
+#ifdef CECE_ENABLE_BOX2D_PHYSICS
+    ConverterBox2D::getInstance().setTimeStep(dt);
+#endif
+}
+
+/* ************************************************************************ */
+
 ViewPtr<const object::Type> Simulation::findObjectType(StringView name) const noexcept
 {
     return m_objectClasses.get(name);
@@ -197,10 +217,28 @@ ViewPtr<const object::Type> Simulation::findObjectType(StringView name) const no
 
 /* ************************************************************************ */
 
+units::Time Simulation::getPhysicsEngineTimeStep() const noexcept
+{
+    return ConverterBox2D::getInstance().getTimeStepBox2D();
+}
+
+/* ************************************************************************ */
+
+units::Length Simulation::getMaxObjectTranslation() const noexcept
+{
+#ifdef CECE_ENABLE_BOX2D_PHYSICS
+    return ConverterBox2D::getInstance().getMaxObjectTranslation();
+#else
+    return units::Length{1e3};
+#endif
+}
+
+/* ************************************************************************ */
+
 void Simulation::setGravity(const AccelerationVector& gravity) noexcept
 {
 #ifdef CECE_ENABLE_BOX2D_PHYSICS
-    m_world.SetGravity(m_converter.convertLinearAcceleration(gravity));
+    m_world->SetGravity(ConverterBox2D::getInstance().convertLinearAcceleration(gravity));
 #else
     // TODO: store
 #endif
@@ -290,6 +328,15 @@ object::Object* Simulation::buildObject(const String& name, object::Object::Type
 
 /* ************************************************************************ */
 
+#ifdef CECE_ENABLE_BOX2D_PHYSICS
+void Simulation::setPhysicsEngineTimeStep(units::Time dt) noexcept
+{
+    ConverterBox2D::getInstance().setTimeStepBox2D(dt);
+}
+#endif
+
+/* ************************************************************************ */
+
 UniquePtr<program::Program> Simulation::buildProgram(StringView name)
 {
     Log::debug("Create program '", name, "'");
@@ -375,7 +422,7 @@ bool Simulation::update()
     {
         auto _ = measure_time("sim.physics", TimeMeasurement(this));
 
-        m_world.Step(getPhysicsEngineTimeStep().value(), 10, 10);
+        m_world->Step(getPhysicsEngineTimeStep().value(), 10, 10);
     }
 #endif
 
@@ -389,7 +436,7 @@ void Simulation::initialize(AtomicBool& termFlag)
     Assert(!isInitialized());
 
     // Initialize simulation
-    m_initializers.call(*this);
+    m_initializers.init(*this);
 
     // Initialize modules
     m_modules.init(termFlag);
@@ -405,7 +452,7 @@ void Simulation::loadConfig(const config::Configuration& config)
     setTimeStep(config.get<units::Time>("dt"));
 
     if (config.has("length-coefficient"))
-        m_converter.setLengthCoefficient(config.get<RealType>("length-coefficient"));
+        ConverterBox2D::getInstance().setLengthCoefficient(config.get<RealType>("length-coefficient"));
 
     setGravity(config.get("gravity", getGravity()));
     setIterations(config.get("iterations", getIterations()));
@@ -545,7 +592,7 @@ void Simulation::storeConfig(config::Configuration& config) const
 {
     config.set("world-size", getWorldSize());
     config.set("dt", getTimeStep());
-    config.set("length-coefficient", m_converter.getLengthCoefficient());
+    config.set("length-coefficient", ConverterBox2D::getInstance().getLengthCoefficient());
     config.set("gravity", getGravity());
     config.set("iterations", getIterations());
 
@@ -592,7 +639,7 @@ void Simulation::storeConfig(config::Configuration& config) const
     {
         auto moduleConfig = config.addConfiguration("module");
         moduleConfig.set("name", module.name);
-        module.module->storeConfig(moduleConfig);
+        module->storeConfig(moduleConfig);
     }
 
     // Store programs
@@ -600,7 +647,7 @@ void Simulation::storeConfig(config::Configuration& config) const
     {
         auto programConfig = config.addConfiguration("program");
         programConfig.set("name", program.name);
-        program.program->storeConfig(*this, programConfig);
+        program->storeConfig(*this, programConfig);
     }
 
     // TODO: store objects
@@ -626,7 +673,7 @@ void Simulation::draw(render::Context& context)
 
 #if defined(CECE_ENABLE_RENDER) && defined(CECE_ENABLE_BOX2D_PHYSICS) && defined(CECE_ENABLE_BOX2D_PHYSICS_DEBUG)
     if (isDrawPhysics())
-        m_world.DrawDebugData();
+        m_world->DrawDebugData();
 #endif
 
 }
@@ -707,7 +754,7 @@ void Simulation::storeDataTables()
 ViewPtr<object::Object> Simulation::query(const PositionVector& position) const noexcept
 {
 #ifdef CECE_ENABLE_BOX2D_PHYSICS
-    const auto pos = getConverter().convertPosition(position);
+    const auto pos = ConverterBox2D::getInstance().convertPosition(position);
     QueryCallback query(pos);
 
     b2AABB aabb;
@@ -716,7 +763,7 @@ ViewPtr<object::Object> Simulation::query(const PositionVector& position) const 
     aabb.lowerBound = pos - d;
     aabb.upperBound = pos + d;
 
-    m_world.QueryAABB(&query, aabb);
+    m_world->QueryAABB(&query, aabb);
 
     // Find object
     for (const auto& object : m_objects)

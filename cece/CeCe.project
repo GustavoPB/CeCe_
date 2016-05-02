@@ -109,7 +109,6 @@
     <File Name="core/Assert.hpp"/>
     <File Name="core/Factory.hpp"/>
     <File Name="core/IntegerSequence.hpp"/>
-    <File Name="core/LexicalCast.hpp"/>
     <File Name="core/Macro.hpp"/>
     <File Name="core/TimeMeasurement.cpp"/>
     <File Name="core/TimeMeasurement.hpp"/>
@@ -139,6 +138,8 @@
       <File Name="core/ValueIterator.hpp"/>
       <File Name="core/VectorRange.hpp"/>
       <File Name="core/Range.hpp"/>
+      <File Name="core/PtrContainer.hpp"/>
+      <File Name="core/PtrNamedContainer.hpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="allocator">
       <File Name="core/AlignedAllocator.cpp"/>
@@ -163,11 +164,15 @@
       <File Name="core/InOutStream.hpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="unit">
-      <File Name="core/Units.cpp"/>
       <File Name="core/Units.hpp"/>
       <File Name="core/UnitsCtors.hpp"/>
       <File Name="core/VectorUnits.cpp"/>
       <File Name="core/VectorUnits.hpp"/>
+      <File Name="core/UnitIo.hpp"/>
+      <File Name="core/UnitSymbol.hpp"/>
+      <File Name="core/UnitIo.cpp"/>
+      <File Name="core/Unit.hpp"/>
+      <File Name="core/Unit.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="log">
       <File Name="core/Log.cpp"/>
@@ -209,6 +214,7 @@
       <File Name="core/Shape.hpp"/>
       <File Name="core/ShapeToGrid.hpp"/>
     </VirtualDirectory>
+    <File Name="core/FactoryManager.hpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="render">
     <File Name="render/Buffer.cpp"/>

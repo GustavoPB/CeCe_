@@ -35,8 +35,12 @@ add_library(${PROJECT_NAME} OBJECT
     DynamicArray.hpp
     StaticArray.hpp
     StaticMatrix.hpp
+    Unit.hpp
+    Unit.cpp
+    UnitIo.hpp
+    UnitIo.cpp
+    UnitSymbol.hpp
     Units.hpp
-    Units.cpp
     UnitsCtors.hpp
     Vector.hpp
     Vector.cpp
@@ -84,8 +88,11 @@ add_library(${PROJECT_NAME} OBJECT
     Parameters.hpp
     Parameters.cpp
     Factory.hpp
+    FactoryManager.hpp
     Shape.hpp
     ShapeToGrid.hpp
+    PtrContainer.hpp
+    PtrNamedContainer.hpp
 )
 
 # ######################################################################### #
@@ -117,8 +124,13 @@ build_test(core
         test/TokenizerTest.cpp
         ExpressionParser.hpp
         ExpressionParser.cpp
+        Unit.hpp
+        Unit.cpp
+        UnitIo.hpp
+        UnitIo.cpp
+        UnitSymbol.hpp
         Units.hpp
-        Units.cpp
+        UnitsCtors.hpp
         Parameters.hpp
         Parameters.cpp
 )

@@ -54,19 +54,15 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 elseif (CMAKE_COMPILER_IS_GNUCXX)
     # using GCC
 
-    # Get G++ version
-    execute_process(COMMAND
-        ${CMAKE_CXX_COMPILER} -dumpversion
-        OUTPUT_VARIABLE GCC_VERSION
-    )
-
-    if (GCC_VERSION VERSION_LESS 4.9)
-        message(WARNING "Application uses C++ regex that doesn't work in GCC < 4.9")
-    endif()
-
     # C++11 required
     #add_compile_options(-Wall -pedantic-errors -pedantic -std=c++11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic-errors -pedantic -std=c++11")
+
+    # Static linkage
+    if (MINGW)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+    endif ()
 
 elseif (MSVC)
     # using Visual Studio C++
