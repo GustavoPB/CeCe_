@@ -65,6 +65,8 @@ add_library(${PROJECT_NAME} OBJECT
     InStream.hpp
     InOutStream.hpp
     FileStream.hpp
+    CsvFile.hpp
+    CsvFile.cpp
     ValueIterator.hpp
     Range.hpp
     VectorRange.hpp
@@ -113,6 +115,7 @@ install(DIRECTORY .
 # Add tests
 build_test(core
     SOURCES
+        test/AlignedAllocatorTest.cpp
         test/DynamicArrayTest.cpp
         test/IteratorRangeTest.cpp
         test/VectorRangeTest.cpp
@@ -122,17 +125,12 @@ build_test(core
         test/VectorUnitsTest.cpp
         test/ExpressionParserTest.cpp
         test/TokenizerTest.cpp
-        ExpressionParser.hpp
-        ExpressionParser.cpp
-        Unit.hpp
-        Unit.cpp
-        UnitIo.hpp
-        UnitIo.cpp
-        UnitSymbol.hpp
-        Units.hpp
-        UnitsCtors.hpp
-        Parameters.hpp
-        Parameters.cpp
+        test/ParametersTest.cpp
+        test/PtrContainerTest.cpp
+        test/ViewPtrTest.cpp
+        $<TARGET_OBJECTS:core>
+    LIBRARIES
+        ${Boost_LIBRARIES}
 )
 
 # ######################################################################### #

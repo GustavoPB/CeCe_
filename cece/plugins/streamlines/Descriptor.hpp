@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2016                                                    */
+/* Georgiev Lab (c) 2015-2016                                               */
 /* ************************************************************************ */
 /* Department of Cybernetics                                                */
 /* Faculty of Applied Sciences                                              */
@@ -41,7 +41,7 @@ namespace streamlines {
 /* ************************************************************************ */
 
 /**
- * @brief Utility class.
+ * @brief Utility class which store LB configuration.
  */
 class Descriptor
 {
@@ -87,12 +87,33 @@ public:
     /// Number of populations.
     static constexpr DirectionType SIZE = 9;
 
+    /// Default density.
+    static constexpr DensityType DEFAULT_DENSITY = 1.0;
+
     /// Direction index map.
     static constexpr StaticArray<StaticArray<DirectionType, 3>, 3> INDEX_MAP{{
         {{1, 8, 7}},
         {{2, 0, 6}},
         {{3, 4, 5}}
     }};
+
+    /// Direction index top line.
+    static const StaticArray<DirectionType, 3> TOP_LINE;
+
+    /// Direction index middle line.
+    static const StaticArray<DirectionType, 3> MIDDLE_LINE;
+
+    /// Direction index bottom line.
+    static const StaticArray<DirectionType, 3> BOTTOM_LINE;
+
+    /// Direction index left column.
+    static const StaticArray<DirectionType, 3> LEFT_COLUMN;
+
+    /// Direction index middle column.
+    static const StaticArray<DirectionType, 3> MIDDLE_COLUMN;
+
+    /// Direction index right column.
+    static const StaticArray<DirectionType, 3> RIGHT_COLUMN;
 
     /// Direction weights.
     static constexpr StaticArray<RealType, SIZE> DIRECTION_WEIGHTS = {{
@@ -175,6 +196,19 @@ public:
         const auto posR = static_cast<RealType>(pos);
         const auto sizeR = static_cast<RealType>(size);
         return 4.0 * max / (sizeR * sizeR) * (sizeR * posR - posR * posR);
+    }
+
+
+    /**
+     * @brief Returns an opposite index.
+     *
+     * @param iPop Population index.
+     *
+     * @return Opposite index of iPop.
+     */
+    static DirectionType opposite(DirectionType iPop) noexcept
+    {
+        return DIRECTION_OPPOSITES[iPop];
     }
 
 };

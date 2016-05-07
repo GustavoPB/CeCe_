@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2016                                                    */
+/* Georgiev Lab (c) 2015-2016                                               */
 /* ************************************************************************ */
 /* Department of Cybernetics                                                */
 /* Faculty of Applied Sciences                                              */
@@ -28,11 +28,14 @@
 
 // C++
 #include <utility>
+#include <iterator>
+#include <numeric>
 
 // CeCe
 #include "cece/core/Zero.hpp"
 
-// CeCe Plugin
+// Plugin
+#include "cece/plugins/streamlines/config.hpp"
 #include "cece/plugins/streamlines/Descriptor.hpp"
 
 /* ************************************************************************ */
@@ -46,7 +49,9 @@ namespace streamlines {
 BounceBackDynamics::DensityType
 BounceBackDynamics::computeDensity(const DataType& data) const noexcept
 {
-    return 1.0;
+    using std::begin;
+    using std::end;
+    return std::accumulate(begin(data), end(data), DensityType(0.0));
 }
 
 /* ************************************************************************ */
@@ -109,6 +114,16 @@ BounceBackDynamics::defineVelocity(DataType& data, VelocityType velocity) const 
 void
 BounceBackDynamics::collide(DataType& data) const noexcept
 {
+#ifdef CECE_PLUGIN_streamlines_SWAP_TRICK
+    constexpr Descriptor::DirectionType half = (Descriptor::SIZE - 1) / 2;
+
+    // Swap opposite (without temporary memory)
+    for (Descriptor::DirectionType i = 1; i <= half; ++i)
+    {
+        using std::swap;
+        swap(data[i], data[i + half]);
+    }
+#else
     // Static obstacle, bounce all back
     DataType temp;
 
@@ -118,6 +133,7 @@ BounceBackDynamics::collide(DataType& data) const noexcept
 
     // Copy updated values
     data = temp;
+#endif
 }
 
 /* ************************************************************************ */

@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2016                                                    */
+/* Georgiev Lab (c) 2015-2016                                               */
 /* ************************************************************************ */
 /* Department of Cybernetics                                                */
 /* Faculty of Applied Sciences                                              */
@@ -27,6 +27,7 @@
 #include "cece/plugins/streamlines/Lattice.hpp"
 
 // C++
+#include <cstddef>
 #include <utility>
 
 // CeCe
@@ -54,15 +55,16 @@ void Lattice::initEquilibrium()
 
 void Lattice::collide()
 {
-#if DEV_PLUGIN_streamlines_SWAP_TRICK
-    constexpr Node::IndexType half = (Node::SIZE - 1) / 2;
+#ifdef CECE_PLUGIN_streamlines_SWAP_TRICK
+    constexpr Descriptor::DirectionType half = (Descriptor::SIZE - 1) / 2;
 
     for (auto&& c : range(getSize()))
     {
         auto& cell = get(c);
         cell.collide();
 
-        for (Node::IndexType i = 1; i < half; ++i)
+        // TODO: block swap
+        for (Descriptor::DirectionType i = 1; i <= half; ++i)
         {
             using std::swap;
             swap(cell[i], cell[i + half]);
@@ -78,15 +80,15 @@ void Lattice::collide()
 
 void Lattice::stream()
 {
-#if DEV_PLUGIN_streamlines_SWAP_TRICK
-    constexpr Descriptor::IndexType half = (Descriptor::SIZE - 1) / 2;
+#ifdef CECE_PLUGIN_streamlines_SWAP_TRICK
+    constexpr Descriptor::DirectionType half = (Descriptor::SIZE - 1) / 2;
 
     for (auto&& c : range(getSize()))
     {
-        for (Descriptor::IndexType i = 1; i < half; ++i)
+        for (Descriptor::DirectionType i = 1; i <= half; ++i)
         {
             // Calculate new coordinates
-            const Vector<Descriptor::IndexType> newCoord = c + Descriptor::DIRECTION_VELOCITIES[i];
+            const Vector<Descriptor::DirectionType> newCoord = c + Descriptor::DIRECTION_VELOCITIES[i];
 
             // Swap
             if (inRange(newCoord))
@@ -124,9 +126,9 @@ void Lattice::collideAndStream()
 {
     collide();
     stream();
-    /*
+/*
     // FIXME: something's wrong
-    constexpr Node::IndexType half = (Node::SIZE - 1) / 2;
+    constexpr Descriptor::IndexType half = (Descriptor::SIZE - 1) / 2;
     const auto size = getSize();
 
     //for (auto&& c : range(getSize()))
@@ -136,12 +138,12 @@ void Lattice::collideAndStream()
         const CoordinateType c{x, y};
 
         auto& cell = get(c);
-        cell.collide(omega);
+        cell.collide();
 
-        for (Node::IndexType i = 1; i < half; ++i)
+        for (Descriptor::IndexType i = 1; i <= half; ++i)
         {
             // Calculate new coordinates
-            const Vector<Node::IndexType> newCoord = c + Node::DIRECTION_VELOCITIES[i];
+            const Vector<Descriptor::IndexType> newCoord = c + Descriptor::DIRECTION_VELOCITIES[i];
 
             if (inRange(newCoord))
             {
@@ -154,7 +156,7 @@ void Lattice::collideAndStream()
             }
         }
     }
-    */
+*/
 }
 
 /* ************************************************************************ */
@@ -169,43 +171,33 @@ void Lattice::setDynamics(ViewPtr<Dynamics> dynamics)
 
 void Lattice::fixupObstacles(ViewPtr<Dynamics> dynamics) noexcept
 {
-    auto noDynamics = NoDynamics::getInstance();
-
     using Offset = Vector<typename std::make_signed<Descriptor::IndexType>::type>;
 
-    // Foreach all cells
-    //for (auto&& c : range(Size{1, 1}, getSize() - Size{1, 1}))
-    for (Descriptor::IndexType y = 1; y < getSize().getY() - 1; ++y)
-    for (Descriptor::IndexType x = 1; x < getSize().getX() - 1; ++x)
-    {
-        CoordinateType c{x, y};
+    static constexpr StaticArray<Offset, 9> OFFSETS{{
+        Offset{ 0,  0},
+        Offset{ 1,  0}, Offset{-1,  0}, Offset{ 0,  1}, Offset{ 1,  1},
+        Offset{-1,  1}, Offset{ 0, -1}, Offset{ 1, -1}, Offset{-1, -1}
+    }};
 
+    auto noDynamics = NoDynamics::getInstance();
+
+    // Foreach all cells
+    for (auto&& c : range(getSize()))
+    {
         if (get(c).getDynamics() != dynamics)
             continue;
 
-        const ViewPtr<Dynamics> types[9] = {
-            get(c).getDynamics(),
-            get(c + Offset{ 1,  0}).getDynamics(),
-            get(c + Offset{-1,  0}).getDynamics(),
-            get(c + Offset{ 0,  1}).getDynamics(),
-            get(c + Offset{ 1,  1}).getDynamics(),
-            get(c + Offset{-1,  1}).getDynamics(),
-            get(c + Offset{ 0, -1}).getDynamics(),
-            get(c + Offset{ 1, -1}).getDynamics(),
-            get(c + Offset{-1, -1}).getDynamics()
-        };
+        bool test = true;
 
-        const bool test =
-            (types[0] == dynamics) &&
-            (types[1] == dynamics || types[1] == noDynamics) &&
-            (types[2] == dynamics || types[2] == noDynamics) &&
-            (types[3] == dynamics || types[3] == noDynamics) &&
-            (types[4] == dynamics || types[4] == noDynamics) &&
-            (types[5] == dynamics || types[5] == noDynamics) &&
-            (types[6] == dynamics || types[6] == noDynamics) &&
-            (types[7] == dynamics || types[7] == noDynamics) &&
-            (types[8] == dynamics || types[8] == noDynamics)
-        ;
+        for (std::size_t i = 0; i < OFFSETS.size(); ++i)
+        {
+            ViewPtr<Dynamics> type;
+
+            if (inRange(c + OFFSETS[i]))
+                type = get(c + OFFSETS[i]).getDynamics();
+
+            test = test && (type == nullptr || type == dynamics || type == noDynamics);
+        }
 
         if (test)
             get(c).setDynamics(noDynamics);

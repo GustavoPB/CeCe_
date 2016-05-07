@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* Georgiev Lab (c) 2015                                                    */
+/* Georgiev Lab (c) 2015-2016                                               */
 /* ************************************************************************ */
 /* Department of Cybernetics                                                */
 /* Faculty of Applied Sciences                                              */
@@ -27,21 +27,27 @@
 
 /* ************************************************************************ */
 
+// Plugin config
+#include "cece/plugins/streamlines/config.hpp"
+
+/* ************************************************************************ */
+
 // CeCe
-#include "cece/core/Units.hpp"
 #include "cece/core/Vector.hpp"
 #include "cece/core/Grid.hpp"
-#include "cece/core/StaticArray.hpp"
 
 // Plugin
 #include "cece/plugins/streamlines/Node.hpp"
-#include "cece/plugins/streamlines/Dynamics.hpp"
 
 /* ************************************************************************ */
 
 namespace cece {
 namespace plugin {
 namespace streamlines {
+
+/* ************************************************************************ */
+
+class Dynamics;
 
 /* ************************************************************************ */
 
@@ -167,7 +173,7 @@ public:
     }
 
 
-#if !DEV_PLUGIN_streamlines_SWAP_TRICK
+#ifndef CECE_PLUGIN_streamlines_SWAP_TRICK
     /**
      * @brief Get item from back buffer.
      *
@@ -182,7 +188,7 @@ public:
 #endif
 
 
-#if !DEV_PLUGIN_streamlines_SWAP_TRICK
+#ifndef CECE_PLUGIN_streamlines_SWAP_TRICK
     /**
      * @brief Get item from back buffer.
      *
@@ -208,8 +214,8 @@ public:
      */
     void setSize(Size size)
     {
-#if !DEV_PLUGIN_streamlines_SWAP_TRICK
         m_data.resize(size);
+#ifndef CECE_PLUGIN_streamlines_SWAP_TRICK
         m_dataBack.resize(size);
 #endif
     }
@@ -267,7 +273,7 @@ public:
     /// Current lattice data.
     core::Grid<Node> m_data;
 
-#if !DEV_PLUGIN_streamlines_SWAP_TRICK
+#ifndef CECE_PLUGIN_streamlines_SWAP_TRICK
     /// Temporaty lattice data.
     core::Grid<Node> m_dataBack;
 #endif

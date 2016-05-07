@@ -23,14 +23,13 @@
 #                                                                           #
 # ######################################################################### #
 
-# Options
-option(DEV_PLUGIN_streamlines_SWAP_TRICK "Enable or disable streamlines swap-trick for computation speedup" Off)
+# Enable swap trick
+option(CECE_PLUGIN_streamlines_SWAP_TRICK "Enable OpenLB swap trick improvement" On)
 
 # ######################################################################### #
 
-if (DEV_PLUGIN_streamlines_SWAP_TRICK)
-    add_definitions(-DDEV_PLUGIN_streamlines_SWAP_TRICK=1)
-endif ()
+# Create config file
+configure_file(config.hpp.in config.hpp)
 
 # ######################################################################### #
 

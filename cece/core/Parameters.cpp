@@ -84,7 +84,7 @@ Parameters::ValueType Parameters::get(KeyViewType name) const
 
 /* ************************************************************************ */
 
-Parameters::ValueType& Parameters::get(KeyViewType name)
+Parameters::ValueType& Parameters::get(KeyViewType name) noexcept
 {
     auto ptr = find(m_data, name);
 
@@ -111,7 +111,7 @@ Parameters::ValueType Parameters::get(KeyViewType name, ValueType def) const noe
 
 /* ************************************************************************ */
 
-void Parameters::set(KeyType name, ValueType value)
+void Parameters::set(KeyType name, ValueType value) noexcept
 {
     auto ptr = find(m_data, name);
 
@@ -123,7 +123,7 @@ void Parameters::set(KeyType name, ValueType value)
 
 /* ************************************************************************ */
 
-void Parameters::merge(const Parameters& parameters)
+void Parameters::append(const Parameters& parameters) noexcept
 {
     for (const auto& param : parameters.m_data)
         set(param.name, param.value);

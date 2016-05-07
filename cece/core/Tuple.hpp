@@ -48,6 +48,17 @@ using Tuple = std::tuple<Args...>;
 /* ************************************************************************ */
 
 /**
+ * @brief Make tuple function.
+ */
+template<typename... Types>
+constexpr auto makeTuple(Types&&... args) -> decltype(std::make_tuple(std::forward<Types>(args)...))
+{
+    return std::make_tuple(std::forward<Types>(args)...);
+}
+
+/* ************************************************************************ */
+
+/**
  * @brief Access function for Tuple.
  *
  * @param t Tuple.
@@ -55,7 +66,7 @@ using Tuple = std::tuple<Args...>;
  * @return
  */
 template<unsigned I, class... Types>
-constexpr auto get(Tuple<Types...>& t) -> decltype(std::get<I>(t))
+constexpr auto getValue(Tuple<Types...>& t) -> decltype(std::get<I>(t))
 {
    return std::get<I>(t);
 }
@@ -70,7 +81,7 @@ constexpr auto get(Tuple<Types...>& t) -> decltype(std::get<I>(t))
  * @return
  */
 template<unsigned I, class... Types>
-constexpr auto get(Tuple<Types...>&& t) -> decltype(std::get<I>(t))
+constexpr auto getValue(Tuple<Types...>&& t) -> decltype(std::get<I>(t))
 {
    return std::get<I>(t);
 }
@@ -85,7 +96,7 @@ constexpr auto get(Tuple<Types...>&& t) -> decltype(std::get<I>(t))
  * @return
  */
 template<unsigned I, class... Types>
-constexpr auto get(const Tuple<Types...>& t) -> decltype(std::get<I>(t))
+constexpr auto getValue(const Tuple<Types...>& t) -> decltype(std::get<I>(t))
 {
    return std::get<I>(t);
 }
