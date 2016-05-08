@@ -60,6 +60,13 @@ namespace parasite {
 class Phage : public ParasiteBase, public cece::plugin::fitness::IFitness
 {
 
+private:
+
+	bool IsFitnessEnabled()
+	{
+		return getFitnessInitDistribution() != "none";
+	}
+
 // Public Ctors & Dtors
 public:
 
@@ -149,10 +156,20 @@ public:
     *
     * @return
     */
-    bool getEnableFitness() const noexcept
+    String getFitnessInitDistribution() const noexcept
     {
-    	return enableFitness;
+    	return fitness_init_ref;
     }
+
+    /**
+	* @brief Return if fitness is enabled for phage class.
+	*
+	* @return
+	*/
+    String getFitnessAptitudeDistribution() const noexcept
+	{
+		return fitness_aptitude_ref;
+	}
 
 
 // Public Accessors
@@ -213,10 +230,20 @@ public:
     *
     * @param String
     */
-    void setEnableFitness(String selector) noexcept
+    void setFitnessInitDistribution(String ref) noexcept
     {
-    	enableFitness = selector == "yes" || selector == "y"; //TOREVIEW: hacer un cast tolower
+    	fitness_init_ref = ref;
     }
+
+    /**
+    * @brief Set value to enable or disable fitness.
+    *
+	* @param String
+	*/
+	void setFitnessAptitudeDistribution(String ref) noexcept
+	{
+		fitness_aptitude_ref = ref;
+	}
 
 // Public Operations
 public:
@@ -280,8 +307,11 @@ private:
     /// If phage has a bud.
     bool m_hasBud = false;
 
-    /// If it should be performed fitness considerations
-    bool enableFitness;
+    /// Reference to the init fitness math expression
+    String fitness_init_ref;
+
+    /// Reference to the aptitude fitness math expression
+    String fitness_aptitude_ref;
 
 
     /**

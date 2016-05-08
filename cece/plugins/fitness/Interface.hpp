@@ -67,7 +67,17 @@ public:
 
 	RealType GetAptitude(String distribution)
 	{
-		return Module::GetAptitude(distribution);
+		return Module::GetAptitude(distribution, fitness);
+	}
+
+	RealType GetFitness()
+	{
+		return fitness;
+	}
+
+	void SetFitness(RealType fitval)
+	{
+		fitness = fitval;
 	}
 
 protected:
