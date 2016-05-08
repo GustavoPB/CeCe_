@@ -32,9 +32,9 @@
 
 /* ************************************************************************ */
 
-#ifndef CECE_ENABLE_BOX2D_PHYSICS
-#error fitness requires physics engine
-#endif
+//#ifndef CECE_ENABLE_BOX2D_PHYSICS
+//#error fitness requires physics engine
+//#endif
 
 /* ************************************************************************ */
 
@@ -46,16 +46,14 @@
 #include "cece/core/String.hpp"
 #include "cece/core/Real.hpp"
 #include "cece/core/Tuple.hpp"
-#include "cece/module/Module.hpp"
 #include "cece/config/Configuration.hpp"
+#include "cece/module/Module.hpp"
 
 // Plugins
-#include "cece/plugins/cell/CellBase.hpp"
-#include "cece/plugins/parasite/ParasiteBase.hpp"
-#include "cece/plugins/object-generator/Module.hpp"
+//#include "cece/plugins/cell/CellBase.hpp"
+//#include "cece/plugins/parasite/ParasiteBase.hpp"
+//#include "cece/plugins/object-generator/Module.hpp"
 
-// Physics
-#include <Box2D/Box2D.h>
 
 /* ************************************************************************ */
 
@@ -70,56 +68,17 @@ namespace fitness {
 /**
  * @brief Module for fitness.
  */
-class Module : public module::Module, public b2ContactListener
+class Module : public module::Module
 {
 
 // Private Structures
 private:
 
-	/**
-	* @brief Structure for storing bonds.
-	*/
-	struct Bond
+	struct Distribution //De momento solo contemplamos distribuciones lineales tanto para fitness como aptitud
 	{
-		String bondRef;
-		String pathogen;
-		String host;
-		RealType maxProdAmount;
-		RealType aConst;
-		RealType dConst;
-	};
-
-
-    /**
-	 * @brief Structure for storing created object parameters.
-	 */
-	struct ObjectDesc
-	{
-		/// Object configuration
-		String bondRef;
-		String objectClass;
-		config::Configuration config;
-	};
-
-	/**
-	 * @brief User data for joint.
-	 */
-	struct JointUserData
-	{
-		const char guard = '@';
-		Module* module;
-		RealType Kd;
-	};
-
-	/**
-	 * @brief Joint definition.
-	 */
-	struct JointDef
-	{
-		String bondRef;
-		b2Body* bodyA;
-		b2Body* bodyB;
-		RealType dConst;
+		String distRef;
+		RealType k;
+		RealType d;
 	};
 
 // Public Ctors & Dtors
@@ -132,132 +91,30 @@ public:
 // Public Operations
 public:
 
-
     /**
-     * @brief Load module configuration.
-     *
-     * @param config Source configuration.
-     */
+    * @brief Load module configuration.
+    *
+    * @param config Source configuration.
+    */
     void loadConfig(const config::Configuration& config) override;
 
 
     /**
-     * @brief Store module configuration.
-     *
-     * @param config Output configuration.
-     */
+    * @brief Store module configuration.
+    *
+    * @param config Output configuration.
+    */
     void storeConfig(config::Configuration& config) const override;
 
+    static RealType SetInitialFitness(String distribution);
 
-    /**
-     * @brief Update module state.
-     */
-    void update() override;
-
-
-    /**
-     * @brief Called when two fixtures begin to touch.
-     *
-     * @param contact
-     */
-    void BeginContact(b2Contact* contact) override;
-
-
-    /**
-     * @brief Called when two fixtures cease to touch.
-     *
-     * @param contact
-     */
-    void EndContact(b2Contact* contact) override;
-
-    /*
-	 * @brief Gets the bond's Reference according to the bond's definition in simulation file
-	 * @note if the names of the objects does not correspond to a bond definition "NO_DEFINED tag will be returned"
-	 */
-    String getBondRefFromObjects(b2Body* bodyA, b2Body* bodyB)
-    {
-    	//auto& ca = static_cast<object::Object*>(bodyA->GetUserData())->castThrow<plugin::cell::CellBase>();
-    	//auto& cb = static_cast<object::Object*>(bodyB->GetUserData())->castThrow<plugin::cell::CellBase>();
-    	auto oa = static_cast<object::Object*>(bodyA->GetUserData());
-    	auto ob = static_cast<object::Object*>(bodyB->GetUserData());
-
-    	plugin::cell::CellBase* ca = NULL;
-    	plugin::parasite::ParasiteBase* cb = NULL;
-    	if(oa->is<plugin::cell::CellBase>())
-    	{
-    		ca = dynamic_cast<plugin::cell::CellBase*>(oa);
-    	}
-    	else
-    	{
-    		cb = dynamic_cast<plugin::parasite::ParasiteBase*>(oa);
-    	}
-   		if(ob->is<plugin::cell::CellBase>())
-   		{
-   			ca = dynamic_cast<plugin::cell::CellBase*>(ob);
-    	}
-    	else
-    	{
-    		cb = dynamic_cast<plugin::parasite::ParasiteBase*>(ob);
-    	}
-
-    	String nameA = ca->getName();
-    	String nameB = cb->getName();
-
-    	String result = "NO_DEFINED";
-
-    	for(auto&& bond : m_bonds)
-    	{
-    		if (isfitnessDefined(bond, nameA, nameB))
-    		{
-    			result = bond.bondRef;
-    			break;
-    		}
-    	}
-
-    	return result;
-    }
-
-    /*
-     * @brief Defines whether the fitnesss is possible (as it was declared in the simulation) or not
-     */
-    //Define si la infección se puede producir atendiendo a la configuración en simulación
-    bool isfitnessDefined(Bond bondDef, String nameA, String nameB)
-    {
-    	//Check whether any of the objects in the contact is a phage
-    	//then if the other corresponds to a infectable cell (host)
-    	int result = false;
-
-    	if(!nameA.empty()  && !nameB.empty())
-    	{
-    		if (nameA == bondDef.pathogen || nameB == bondDef.pathogen)
-    		{
-    			if (nameA == bondDef.host || nameB == bondDef.host)
-    			{
-    				result = true;
-    			}
-    		}
-    	}
-    	return result;
-    }
-
+    static RealType GetAptitude(String distribution);
 
 // Private Data Members
 private:
 
-    /// List of bodies to join
-    DynamicArray<JointDef> m_toJoin;
+    DynamicArray<Distribution> m_distributions;
 
-    //List of bodies to release
-    DynamicArray<JointDef> m_toRelease;
-
-    /// Used time step.
-    units::Duration m_step;
-
-    /// List of created bonds.
-    DynamicArray<Bond> m_bonds;
-
-    /// List of objects
-    DynamicArray<ObjectDesc> m_objects;
 };
 
 

@@ -17,7 +17,7 @@
         	<molecule name="Y" amount="1000" />
         </object>
         
-   		<object name="pepe" class="parasite.Phage" rate="50/s" velocity="500um/s 0" volume="2um3" position-min="-95 45" position-max="-95 55">
+   		<object name="pepe" enable-fitness="yes" class="parasite.Phage" rate="50/s" velocity="500um/s 0" volume="2um3" position-min="-95 45" position-max="-95 55">
    			<molecule name="GFP" amount="1000" />
         	<molecule name="P" amount="1000" />
         </object>
@@ -25,7 +25,7 @@
     
 	<!-- Bond Cell - phage -->
 	<module name="infection">
-	<bond bond-reference="PACE" pathogen="paco" host="pepe"  max-production-amount="3" association-constant="15" disassociation-constant="50" />      
+	<bond bond-reference="PACE" pathogen="pepe" host="paco"  max-production-amount="3" association-constant="15" disassociation-constant="50" />      
 	
 	<production bond-reference="PACE" name="pepe" class="parasite.Phage" volume="2um3">
 		<molecule name="BFP" amount="1000" />

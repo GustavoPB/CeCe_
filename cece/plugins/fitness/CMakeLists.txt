@@ -33,7 +33,6 @@ set(SRCS
 # Build plugin
 build_plugin(fitness
     SOURCES ${SRCS}
-    PLUGINS_REQUIRED cell parasite
 )
 
 # ######################################################################### #

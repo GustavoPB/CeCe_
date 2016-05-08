@@ -50,6 +50,7 @@ endif ()
 # Build plugin
 build_plugin(parasite
     SOURCES ${SRCS}
+    PLUGINS_REQUIRED fitness
 )
 
 # ######################################################################### #

@@ -118,6 +118,12 @@ void Phage::configure(const config::Configuration& config, simulator::Simulation
     setAngleBud(config.get("angle-bud", getAngleBud()));
     setVolumeBudCreate(config.get("volume-bud-create", getVolumeBudCreate()));
     setVolumeBudRelease(config.get("volume-bud-release", getVolumeBudRelease()));
+    setEnableFitness(config.get<String>("enable-fitness", "n"));
+
+    if(getEnableFitness())
+    {
+        this->SetInitialFitness(this->getName());
+    }
 
     // Update parasite shape
     updateShape();

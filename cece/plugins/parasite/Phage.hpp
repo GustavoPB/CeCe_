@@ -44,6 +44,7 @@
 
 // Plugin
 #include "cece/plugins/parasite/ParasiteBase.hpp"
+#include "cece/plugins/fitness/Interface.hpp"
 
 /* ************************************************************************ */
 
@@ -56,7 +57,7 @@ namespace parasite {
 /**
  * @brief Phage representation.
  */
-class Phage : public ParasiteBase
+class Phage : public ParasiteBase, public cece::plugin::fitness::IFitness
 {
 
 // Public Ctors & Dtors
@@ -143,6 +144,16 @@ public:
         return m_volumeBudRelease;
     }
 
+    /**
+    * @brief Return if fitness is enabled for phage class.
+    *
+    * @return
+    */
+    bool getEnableFitness() const noexcept
+    {
+    	return enableFitness;
+    }
+
 
 // Public Accessors
 public:
@@ -197,6 +208,15 @@ public:
         m_volumeBudRelease = std::move(volume);
     }
 
+    /**
+    * @brief Set value to enable or disable fitness.
+    *
+    * @param String
+    */
+    void setEnableFitness(String selector) noexcept
+    {
+    	enableFitness = selector == "yes" || selector == "y"; //TOREVIEW: hacer un cast tolower
+    }
 
 // Public Operations
 public:
@@ -259,6 +279,9 @@ private:
 
     /// If phage has a bud.
     bool m_hasBud = false;
+
+    /// If it should be performed fitness considerations
+    bool enableFitness;
 
 
     /**
