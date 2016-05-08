@@ -33,7 +33,7 @@ set(SRCS
 # Build plugin
 build_plugin(infection
     SOURCES ${SRCS}
-    PLUGINS_REQUIRED cell
+    PLUGINS_REQUIRED cell parasite
 )
 
 # ######################################################################### #
