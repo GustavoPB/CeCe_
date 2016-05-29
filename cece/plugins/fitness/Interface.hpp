@@ -113,7 +113,6 @@ protected:
     	this->fitness = 0.0;//default fitness value
 
 		auto randomNumber = rand() % 100;
-		//Log::debug(randomNumber);
 		auto maxFitnessRange = initDistro.k * 100 + initDistro.d;
 		auto unnormalizedFitness = initDistro.k * static_cast<RealType>(randomNumber) + initDistro.d;
 		this->fitness = (unnormalizedFitness/maxFitnessRange)*100;

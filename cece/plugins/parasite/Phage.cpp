@@ -122,7 +122,9 @@ void Phage::configure(const config::Configuration& config, simulator::Simulation
     //setFitnessAptitudeDistribution(config.get<String>("fitness-aptitude", "none")); //TOREVIEW
 
     for (auto&& cfg : config.getConfigurations("fitness"))
-            setFitnessDistribution(cfg.get("class"), cfg.get<RealType>("expression-k"), cfg.get<RealType>("expression-d"));
+            setFitnessDistribution(cfg.get("class"),
+            		cfg.get<RealType>("expression-k"),
+					cfg.get<RealType>("expression-d"));
 
     if(IsFitnessEnabled())
     {
