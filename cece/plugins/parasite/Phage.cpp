@@ -118,12 +118,15 @@ void Phage::configure(const config::Configuration& config, simulator::Simulation
     setAngleBud(config.get("angle-bud", getAngleBud()));
     setVolumeBudCreate(config.get("volume-bud-create", getVolumeBudCreate()));
     setVolumeBudRelease(config.get("volume-bud-release", getVolumeBudRelease()));
-    setFitnessInitDistribution(config.get<String>("fitness-init-ref", "none"));
-    setFitnessAptitudeDistribution(config.get<String>("fitness-aptitude-ref", "none"));
+    //setFitnessInitDistribution(config.get<String>("fitness-init", "none")); //TOREVIEW
+    //setFitnessAptitudeDistribution(config.get<String>("fitness-aptitude", "none")); //TOREVIEW
+
+    for (auto&& cfg : config.getConfigurations("fitness"))
+            setFitnessDistribution(cfg.get("class"), cfg.get<RealType>("expression-k"), cfg.get<RealType>("expression-d"));
 
     if(IsFitnessEnabled())
     {
-        this->SetInitialFitness(this->getName());
+        this->SetInitialFitness();
     }
 
     // Update parasite shape

@@ -70,6 +70,11 @@ namespace fitness {
  */
 class Module : public module::Module
 {
+// Public Ctors & Dtors
+public:
+
+
+    using module::Module::Module;
 
 // Private Structures
 private:
@@ -81,11 +86,6 @@ private:
 		RealType d;
 	};
 
-// Public Ctors & Dtors
-public:
-
-
-    using module::Module::Module;
 
 
 // Public Operations
@@ -106,14 +106,14 @@ public:
     */
     void storeConfig(config::Configuration& config) const override;
 
-    static RealType SetInitialFitness(String distribution);
+    static RealType GetInitialFitness(String distribution);
 
-    static RealType GetAptitude(String distribution);
+    static RealType GetAptitude(String distribution, RealType fitness);
 
 // Private Data Members
 private:
 
-    DynamicArray<Distribution> m_distributions;
+ DynamicArray<Distribution> m_distributions;
 
 };
 

@@ -32,7 +32,7 @@
 #include <list>
 
 // CeCe
-//#include "cece/core/Log.hpp"
+#include "cece/core/Log.hpp"
 #include "cece/core/constants.hpp"
 #include "cece/core/TimeMeasurement.hpp"
 #include "cece/simulator/TimeMeasurement.hpp"
@@ -50,11 +50,11 @@ namespace {
 
 /* ************************************************************************ */
 
-std::random_device g_rd;
+//std::random_device g_rd;
 
 /* ************************************************************************ */
 
-std::default_random_engine g_gen(g_rd());
+//std::default_random_engine g_gen(g_rd());
 }
 
 	void Module::loadConfig(const config::Configuration& config)
@@ -86,17 +86,33 @@ std::default_random_engine g_gen(g_rd());
 		}
 	}
 
-	RealType Module::SetInitialFitness(String distribution)
+	RealType Module::GetInitialFitness(String distribution)
 	{
 		RealType result;
+		srand(time(NULL));
 
+		/*for (auto& distro : m_distributions)
+		{
+			if(distro.distRef == distribution)
+			{
+				auto randomNumber = rand() % 100;
+				Log::debug(randomNumber);
+				result = distro.k * static_cast<RealType>(randomNumber) + distro.d;
+			}
+		}*/
 		return result;
 	}
 
-	RealType Module::GetAptitude(String distribution)
+	RealType Module::GetAptitude(String distribution, RealType fitness)
 	{
 		RealType result;
-
+		/*for (auto& distro : m_distributions)
+		{
+			if(distro.distRef == distribution)
+			{
+				result = distro.k * fitness + distro.d;
+			}
+		}*/
 		return result;
 	}
 

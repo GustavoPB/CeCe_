@@ -63,11 +63,28 @@ namespace fitness {
 class IFitness
 {
 
+
+	const String INIT_DISTRO_TYPE = "init";
+
+	const String APTITUDE_DISTRO_TYPE = "aptitude";
+
+	// Private Structures
+private:
+
+		struct Distribution //De momento solo contemplamos distribuciones lineales tanto para fitness como aptitud
+		{
+			//String distClass;
+			RealType k;
+			RealType d;
+		};
+
 public:
 
-	RealType GetAptitude(String distribution)
+	RealType GetAptitude()
 	{
-		return Module::GetAptitude(distribution, fitness);
+		RealType aptitude = 0.0;
+		aptitude = aptitudeDistro.k * fitness + aptitudeDistro.d;
+		return aptitude;
 	}
 
 	RealType GetFitness()
@@ -80,15 +97,58 @@ public:
 		fitness = fitval;
 	}
 
+	int GetNextOffspringAmount(int maxProdAmount)
+	{
+		int result;
+		auto maxDistroRange = aptitudeDistro.k * 100 + aptitudeDistro.d;
+		auto intervalRange = maxDistroRange / (maxProdAmount+1); //sin +1 no se generaría nunca el máximo de fagos
+		result = (int)(this->GetAptitude() / intervalRange);
+		return result;
+	}
+
 protected:
 
-    void SetInitialFitness(String distribution)
+    void SetInitialFitness()
     {
-    	fitness = Module::SetInitialFitness(distribution);
+    	this->fitness = 0.0;//default fitness value
+
+		auto randomNumber = rand() % 100;
+		//Log::debug(randomNumber);
+		auto maxFitnessRange = initDistro.k * 100 + initDistro.d;
+		auto unnormalizedFitness = initDistro.k * static_cast<RealType>(randomNumber) + initDistro.d;
+		this->fitness = (unnormalizedFitness/maxFitnessRange)*100;
+    }
+
+    /**
+     * @brief class for storing configuration data
+     * Just to class are allowed: init or aptitude
+     */
+    void setFitnessDistribution(String c, RealType k, RealType d)
+    {
+    	if (c == INIT_DISTRO_TYPE)
+		{
+    		initDistro.k = k;
+    		initDistro.d = d;
+		}
+    	if(c == APTITUDE_DISTRO_TYPE)
+    	{
+			aptitudeDistro.k = k;
+			aptitudeDistro.d = d;
+		}
+    }
+
+    bool IsFitnessEnabled()
+    {
+    	return true;//initDistro != NULL &&  aptitudeDistro != NULL;//TOREVIEW
     }
 
 // Private Data Members
 private:
+
+    //DynamicArray<Distribution> m_distributions;
+    Distribution initDistro;
+
+    Distribution aptitudeDistro;
 
     RealType fitness;
 };

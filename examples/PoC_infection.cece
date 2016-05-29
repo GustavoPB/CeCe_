@@ -20,17 +20,19 @@
    		<object name="pepe" fitness-init-ref="none" fitness-aptitude-ref="none" class="parasite.Phage" rate="50/s" velocity="500um/s 0" volume="2um3" position-min="-95 45" position-max="-95 55">
    			<molecule name="GFP" amount="1000" />
         	<molecule name="P" amount="1000" />
+        	<fitness class="init" expression-k="2" expression-d="0"/>
+        	<fitness class="aptitude" expression-k="1" expression-d="0"/>
         </object>
     </module>
     
 	<!-- Bond Cell - phage -->
 	<module name="infection">
-	<bond bond-reference="PACE" pathogen="pepe" host="paco"  max-production-amount="3" association-constant="15" disassociation-constant="50" />      
+	<bond bond-reference="PACE" pathogen="pepe" host="paco"  max-production-amount="3" disassociation-constant="50" />      
 	
 	<production bond-reference="PACE" name="pepe" class="parasite.Phage" volume="2um3">
 		<molecule name="BFP" amount="1000" />
     </production>
 	</module>
 	
-    <module name="streamlines" char-length="20" number-nodes="10" inlet-velocity="3000um/s" layout="barrier outlet barrier inlet"/>
+    <module name="streamlines" char-length="20" number-nodes="10" inlet-velocity="2000um/s" layout="barrier outlet barrier inlet"/>
 </simulation>

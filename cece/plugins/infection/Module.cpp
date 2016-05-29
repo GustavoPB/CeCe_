@@ -174,7 +174,7 @@ void Module::loadConfig(const config::Configuration& config)
         	c_bond.get("pathogen"),
         	c_bond.get("host"),
 			c_bond.get<RealType>("max-production-amount"),
-            c_bond.get<RealType>("association-constant"),
+            //c_bond.get<RealType>("association-constant"),
             c_bond.get<RealType>("disassociation-constant")
         });
     }
@@ -205,7 +205,7 @@ void Module::storeConfig(config::Configuration& config) const
         bondConfig.set("pathogen", bond.pathogen);
         bondConfig.set("host", bond.host);
         bondConfig.set("max-production-amount", bond.pathogen);
-        bondConfig.set("association-constant", bond.aConst);
+        //bondConfig.set("association-constant", bond.aConst);
         bondConfig.set("disassociation-constant", bond.dConst);
     }
 }
@@ -226,6 +226,7 @@ void Module::BeginContact(b2Contact* contact)
 
     plugin::cell::CellBase* ca = NULL;
     plugin::parasite::ParasiteBase* cb = NULL;
+    plugin::parasite::Phage* cbb = NULL; //Needed to call GetAptitude from phage
     if(oa->is<plugin::cell::CellBase>())
     {
     	ca = dynamic_cast<plugin::cell::CellBase*>(oa);
@@ -233,6 +234,7 @@ void Module::BeginContact(b2Contact* contact)
     else
     {
     	cb = dynamic_cast<plugin::parasite::ParasiteBase*>(oa);
+    	cbb = dynamic_cast<plugin::parasite::Phage*>(oa); //Needed to call GetAptitude from phage
     }
   	if(ob->is<plugin::cell::CellBase>())
     {
@@ -241,6 +243,7 @@ void Module::BeginContact(b2Contact* contact)
     else
     {
     	cb = dynamic_cast<plugin::parasite::ParasiteBase*>(ob);
+    	cbb = dynamic_cast<plugin::parasite::Phage*>(ob); //Needed to call GetAptitude from phage
     }
 
     for (unsigned int i = 0; i < m_bonds.size(); i++)
@@ -249,7 +252,7 @@ void Module::BeginContact(b2Contact* contact)
     	if (isInfectionDefined(m_bonds[i], ca->getName(), cb->getName()))
     	{
     		//Nota: es necesario que el fago se introdujera siempre en la primera posicion de m_toJoin
-        std::bernoulli_distribution dist1(getAssociationPropensity(m_step, m_bonds[i].aConst));
+        std::bernoulli_distribution dist1(getAssociationPropensity(m_step, /*m_bonds[i].aConst*/cbb->GetAptitude()));
         if (dist1(g_gen))
         {
             Log::debug("Joined: ", ba, ", ", bb);
@@ -274,14 +277,22 @@ void Module::EndContact(b2Contact* contact)
 		auto ob = static_cast<object::Object*>(releasedjoin.bodyB->GetUserData());
 
 		plugin::cell::CellBase* ca = NULL;
-
+		plugin::parasite::Phage* cb = NULL;
 		if(oa->is<plugin::cell::CellBase>())
 		{
 			ca = dynamic_cast<plugin::cell::CellBase*>(oa);
 		}
 		else
 		{
+			cb = dynamic_cast<plugin::parasite::Phage*>(oa);
+		}
+		if(ob->is<plugin::cell::CellBase>())
+		{
 			ca = dynamic_cast<plugin::cell::CellBase*>(ob);
+		}
+		else
+		{
+			cb = dynamic_cast<plugin::parasite::Phage*>(ob);
 		}
 
 		for(auto&& bond : m_bonds)
@@ -292,7 +303,7 @@ void Module::EndContact(b2Contact* contact)
 				{
 					if (bond.bondRef == obj.bondRef)
 					{
-						auto phageAmount = bond.maxProdAmount;//TODO: should add a function of probability
+						auto phageAmount = cb->GetNextOffspringAmount(bond.maxProdAmount);
 
 						for (unsigned int i = 0; i < phageAmount; i++)
 						{
@@ -304,6 +315,10 @@ void Module::EndContact(b2Contact* contact)
 							pos = ca->getPosition();//ca is always the host
 
 							object->setPosition(pos);
+
+							//fitness offspring transmission
+							auto newPhage = dynamic_cast<plugin::parasite::Phage*>(object);
+							newPhage->SetFitness(cb->GetFitness());
 						}
 					}
 				}

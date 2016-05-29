@@ -28,6 +28,7 @@ set(SRCS
     Library.cpp
     Module.hpp
     Module.cpp
+    Interface.hpp
 )
 
 # Build plugin

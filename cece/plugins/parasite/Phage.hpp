@@ -60,13 +60,6 @@ namespace parasite {
 class Phage : public ParasiteBase, public cece::plugin::fitness::IFitness
 {
 
-private:
-
-	bool IsFitnessEnabled()
-	{
-		return getFitnessInitDistribution() != "none";
-	}
-
 // Public Ctors & Dtors
 public:
 
@@ -156,20 +149,20 @@ public:
     *
     * @return
     */
-    String getFitnessInitDistribution() const noexcept
-    {
-    	return fitness_init_ref;
-    }
+    //String getFitnessInitDistribution() const noexcept
+    //{
+    //	return fitness_init_ref;
+    //}
 
     /**
 	* @brief Return if fitness is enabled for phage class.
 	*
 	* @return
 	*/
-    String getFitnessAptitudeDistribution() const noexcept
-	{
-		return fitness_aptitude_ref;
-	}
+    //String getFitnessAptitudeDistribution() const noexcept
+	//{
+	//	return fitness_aptitude_ref;
+	//}
 
 
 // Public Accessors
@@ -230,20 +223,22 @@ public:
     *
     * @param String
     */
-    void setFitnessInitDistribution(String ref) noexcept
-    {
-    	fitness_init_ref = ref;
-    }
+    //void setFitnessInitDistribution(String ref) noexcept
+    //{
+    //	fitness_init_ref = ref;
+    //}
 
     /**
     * @brief Set value to enable or disable fitness.
     *
 	* @param String
 	*/
-	void setFitnessAptitudeDistribution(String ref) noexcept
-	{
-		fitness_aptitude_ref = ref;
-	}
+	//void setFitnessAptitudeDistribution(String ref) noexcept
+	//{
+	//	fitness_aptitude_ref = ref;
+	//}
+
+
 
 // Public Operations
 public:
@@ -308,10 +303,10 @@ private:
     bool m_hasBud = false;
 
     /// Reference to the init fitness math expression
-    String fitness_init_ref;
+    //String fitness_init_ref; //TODELETE
 
     /// Reference to the aptitude fitness math expression
-    String fitness_aptitude_ref;
+    //String fitness_aptitude_ref;//TODELETE
 
 
     /**

@@ -52,6 +52,7 @@
 // Plugins
 #include "cece/plugins/cell/CellBase.hpp"
 #include "cece/plugins/parasite/ParasiteBase.hpp"
+#include "cece/plugins/parasite/Phage.hpp"
 #include "cece/plugins/object-generator/Module.hpp"
 
 // Physics
@@ -85,7 +86,7 @@ private:
 		String pathogen;
 		String host;
 		RealType maxProdAmount;
-		RealType aConst;
+		//RealType aConst;
 		RealType dConst;
 	};
 
