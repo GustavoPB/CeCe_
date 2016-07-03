@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<!-- Simulation definition -->
+<simulation world-size="200um 150um" dt="1ms" background="white" length-coefficient="1e-1">
+
+    <plugin name="cell" />
+    <plugin name="object-generator" />
+    <plugin name="streamlines" />
+    <plugin name="bioreactor" pipe-top="20um" pipe-radius="5um" size="80um" visible="true" isSymmetric="false" uno="Este_es_uno">
+    	<pipe otro="Este_es_otro" />
+    </plugin>
+    <plugin name="agglutination" />
+    
+
+    <!-- Generate yeast cells -->
+    <module name="object-generator">
+        <object class="cell.Yeast" rate="100/s" velocity="500um/s 0" volume="5um3" position-min="-95 45" position-max="-95 55">
+        	<molecule name="RFP" amount="1000" />
+        	<molecule name="Y" amount="1000" />
+        </object>
+   		<object class="cell.Cell" rate="50/s" velocity="500um/s 0" volume="2um3" position-min="-95 45" position-max="-95 55">
+   			<molecule name="GFP" amount="1000" />
+        	<molecule name="P" amount="1000" />
+        </object>
+    </module>
+    
+    <!-- Bond Cell - phage -->
+    <module name="agglutination">
+  		<bond ligand="P" receptor="Y" association-constant="50" disassociation-constant="75" />
+	</module>
+	
+    <!-- <object class="obstacle.Polygon" position="0 55" vertices="0 0 0 -40" show="true" /> -->
+    <module name="streamlines" char-length="20" number-nodes="10" inlet-velocity="2000um/s" layout="barrier outlet barrier inlet"/>
+</simulation>
