@@ -32,6 +32,7 @@
 #include "cece/plugin/Api.hpp"
 #include "cece/config/Configuration.hpp"
 #include "cece/simulator/Simulation.hpp"
+#include "cece/core/DynamicArray.hpp"
 #include "cece/core/Log.hpp"
 
 /* ************************************************************************ */
@@ -42,6 +43,47 @@ using namespace cece::simulator;
 /* ************************************************************************ */
 
 class BioreactorApi: public plugin::Api {
+
+private: //Types
+
+	/**
+	 * @brief Layout type for side.
+	 */
+	enum class LayoutType
+	{
+		Top,
+		Left,
+		Bottom,
+		Right
+	};
+
+	struct ChamberDefinition
+	{
+		units::Length height;
+		units::Length width;
+		bool isVisible;
+	};
+
+	struct PipeDefinition
+	{
+		units::Length pipeRadius;
+		units::Length pipeSpacing;
+		int pipeAmount;
+		String pipePosition; //TODO: debe ser de tipo LayoutType
+		String dockTo; //TODO: debe ser de tipo LayoutType
+	};
+
+private: //Properties
+
+	ChamberDefinition _chamberDefinition;
+
+	DynamicArray<PipeDefinition> _pipeDefinition;
+
+private: //Methods
+
+	//TODO: void validateConfiguration
+
+public:
 
 	/**
 	 * @brief Returns a list of required plugins.
@@ -59,18 +101,22 @@ class BioreactorApi: public plugin::Api {
 		constexpr auto SLOPE = units::um(5);
 
 		const auto worldSizeHalf = simulation.getWorldSize() * 0.5;
-		const auto uno = config.get<String>("uno");
-		Log::debug("uno:", uno);
 
-		for (auto&& c_bond : config.getConfigurations("pipe"))
+		//Informacion extraida de la etiqueta padre
+		_chamberDefinition.height = config.get<units::Length>("height");
+		_chamberDefinition.width = config.get<units::Length>("width");
+		_chamberDefinition.isVisible = config.get("isVisible", false);
+
+		for (auto&& pipe : config.getConfigurations("pipe"))
 		    {
-				for (auto p: c_bond.getNames())
-				{
-					Log::debug("Estoy dentro");
-					Log::debug( p);
+				this->_pipeDefinition.push_back(PipeDefinition{
+					pipe.get<units::Length>("pipe-radius"),
+					pipe.get<units::Length>("pipe-spacing"),
+					pipe.get<int>("number-of-pipes"),
+					pipe.get("pipe-position"), //TODO: funcion que solo acepte elementos que coincidan con la estructura
+					pipe.get("dock-to") //TODO: funcion que solo acepte elementos que coincidan con la estructura
 				}
-				//const auto otro = config.get<String>("otro");
-				Log::debug("otro:", c_bond.get<String>("otro"));
+				);
 		    }
 
 
