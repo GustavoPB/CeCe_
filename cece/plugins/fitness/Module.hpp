@@ -76,17 +76,6 @@ public:
 
     using module::Module::Module;
 
-// Private Structures
-private:
-
-	struct Distribution //De momento solo contemplamos distribuciones lineales tanto para fitness como aptitud
-	{
-		String distRef;
-		RealType k;
-		RealType d;
-	};
-
-
 
 // Public Operations
 public:
@@ -106,14 +95,7 @@ public:
     */
     void storeConfig(config::Configuration& config) const override;
 
-    static RealType GetInitialFitness(String distribution);
 
-    static RealType GetAptitude(String distribution, RealType fitness);
-
-// Private Data Members
-private:
-
- DynamicArray<Distribution> m_distributions;
 
 };
 

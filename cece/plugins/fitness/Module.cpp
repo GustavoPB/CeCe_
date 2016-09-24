@@ -62,14 +62,14 @@ namespace {
 		 // Configure parent
 		 module::Module::loadConfig(config);
 
-		 for (auto&& c_dist : config.getConfigurations("distribution"))
+		 /*for (auto&& c_dist : config.getConfigurations("distribution"))
 		 {
 			 m_distributions.push_back(Distribution{
 		     c_dist.get("distribution-reference"),
 		     c_dist.get<RealType>("expression-k"),
 			 c_dist.get<RealType>("expression-d")
 			 	 });
-		  }
+		  }*/
 	}
 
 	void Module::storeConfig(config::Configuration& config) const
@@ -77,44 +77,15 @@ namespace {
 		module::Module::storeConfig(config);
 
 		// Foreach bonds
-		for (const auto& distro : m_distributions)
+		/*for (const auto& distro : m_distributions)
 		{
 			auto distroConfig = config.addConfiguration("distribution");
 		    distroConfig.set("distribution-reference", distro.distRef);
 		    distroConfig.set("expression-k", distro.k);
 		    distroConfig.set("expression-d", distro.d);
-		}
-	}
-
-	RealType Module::GetInitialFitness(String distribution)
-	{
-		RealType result;
-		srand(time(NULL));
-
-		/*for (auto& distro : m_distributions)
-		{
-			if(distro.distRef == distribution)
-			{
-				auto randomNumber = rand() % 100;
-				Log::debug(randomNumber);
-				result = distro.k * static_cast<RealType>(randomNumber) + distro.d;
-			}
 		}*/
-		return result;
 	}
 
-	RealType Module::GetAptitude(String distribution, RealType fitness)
-	{
-		RealType result;
-		/*for (auto& distro : m_distributions)
-		{
-			if(distro.distRef == distribution)
-			{
-				result = distro.k * fitness + distro.d;
-			}
-		}*/
-		return result;
-	}
 
 /* ************************************************************************ */
 }

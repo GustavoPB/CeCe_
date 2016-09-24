@@ -66,7 +66,8 @@ std::default_random_engine g_gen(g_rd());
 
 void Module::update()
 {
-	Log::debug(getSimulation().getObjectCount());
+	auto time = getSimulation().getTotalTime();
+	Log::debug("Time: ", time.value(), " - ObjectCount: ",getSimulation().getObjectCount());
 }
 
 /* ************************************************************************ */

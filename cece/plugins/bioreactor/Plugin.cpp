@@ -81,7 +81,13 @@ private: //Properties
 
 private: //Methods
 
-	//TODO: void validateConfiguration
+	void validateConfiguration()
+	{
+		//TODO: iterar por los pipes y comprobar semantica
+		//Si con el ancho dado se pueden meter la cantidad de pipes indicada
+		//Si se ha elegido un lado comprobar si el dock es valido
+		throw new Exception();
+	}
 
 public:
 

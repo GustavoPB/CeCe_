@@ -172,6 +172,7 @@ void Yeast::budRelease()
     bud->setPrograms(getPrograms().clone());
     bud->setDensity(getDensity());
     bud->setGrowthRate(getGrowthRate());
+    bud->setVolumeMax(getVolumeMax());
     bud->updateShape();
 
     // Split molecules between yeast and bud
